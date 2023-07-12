@@ -1,10 +1,20 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import MainApp from './modules/App/MainApp.tsx'
-import { handlers } from './__test-utils__/msw/handlers.ts'
 import { setupWorker } from 'msw'
 
-import './config/i18n.config'
+import { handlers } from '@/__test-utils__/msw/handlers.ts'
+import '@/config/i18n.config'
+import MainApp from '@/modules/App/MainApp.tsx'
+
+if (import.meta.env.VITE_MONITORING_BUGSNAG) {
+  import(/* webpackChunkName: "hivemq-monitoring" */ '@/config/monitoring/bugsnag.config.ts')
+}
+if (import.meta.env.VITE_MONITORING_SENTRY) {
+  import(/* webpackChunkName: "hivemq-monitoring" */ '@/config/monitoring/sentry.config.ts')
+}
+if (import.meta.env.VITE_MONITORING_DATADOG_APP) {
+  import(/* webpackChunkName: "hivemq-monitoring" */ '@/config/monitoring/datadog.config.ts')
+}
 
 if (import.meta.env.MODE === 'development') {
   import(/* webpackChunkName: "hivemq-dev-chunk" */ './__test-utils__/dev-console')
