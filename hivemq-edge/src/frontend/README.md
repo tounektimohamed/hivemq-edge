@@ -110,3 +110,36 @@ with the following options:
 ### Percy - Visual testing
 
 https://percy.io/f896bbdc/hivemq-edge
+
+## Monitoring
+
+This POC branch is just a trial - and showcase - how different Error Tracking llibraries can be integrated with the 
+frontend. Three examples (certainly the most common frameworks) have been tried :
+
+- Sentry 
+- Datadog
+- BugSnag
+
+All of them have a single configuration point (in the `/config/monitoring` folder), with a trigger based on their 
+respective private key/token specified in the `./.env.local` file: 
+
+```dotenv
+VITE_MONITORING_BUGSNAG=my-bugsnag-token
+VITE_MONITORING_SENTRY=https://my-sentry-host.ingest.sentry.io/my-sentry-token
+VITE_MONITORING_DATADOG_APP=my-datadog-app-id
+VITE_MONITORING_DATADOG_TOKEN=my-datadog-token
+```
+
+The config and the dependencies are imported only if configured, see `./src/Main.tsx`  
+
+```ts
+if (import.meta.env.VITE_MONITORING_BUGSNAG) {
+  import(/* webpackChunkName: "hivemq-monitoring" */ '@/config/monitoring/bugsnag.config.ts')
+}
+if (import.meta.env.VITE_MONITORING_SENTRY) {
+  import(/* webpackChunkName: "hivemq-monitoring" */ '@/config/monitoring/sentry.config.ts')
+}
+if (import.meta.env.VITE_MONITORING_DATADOG_APP) {
+  import(/* webpackChunkName: "hivemq-monitoring" */ '@/config/monitoring/datadog.config.ts')
+}
+```
