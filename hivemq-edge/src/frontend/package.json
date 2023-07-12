@@ -25,12 +25,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@bugsnag/js": "^7.20.2",
+    "@bugsnag/plugin-react": "^7.19.0",
     "@chakra-ui/anatomy": "^2.1.1",
     "@chakra-ui/icons": "^2.0.19",
     "@chakra-ui/radio": "^2.0.22",
     "@chakra-ui/react": "^2.6.1",
     "@chakra-ui/skip-nav": "^2.0.15",
     "@chakra-ui/utils": "^2.0.14",
+    "@datadog/browser-rum": "^4.45.0",
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@fontsource/roboto": "^5.0.3",
@@ -39,6 +42,7 @@
     "@rjsf/core": "^5.8.1",
     "@rjsf/utils": "^5.8.1",
     "@rjsf/validator-ajv8": "^5.8.1",
+    "@sentry/react": "^7.58.0",
     "@tanstack/react-query": "^4.29.7",
     "@tanstack/react-query-devtools": "^4.29.7",
     "axios": "^1.4.0",
@@ -56,6 +60,7 @@
     "react-router-dom": "^6.11.2"
   },
   "devDependencies": {
+    "@bugsnag/source-maps": "^2.3.1",
     "@percy/cli": "^1.24.2",
     "@percy/cypress": "^3.1.2",
     "@testing-library/jest-dom": "^5.16.5",
