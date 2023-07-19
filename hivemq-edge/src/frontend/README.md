@@ -121,4 +121,5 @@ It contains - and enforces - parts of the testing pyramid for frontend applicati
 
 ### Percy - Visual testing More Test
 
+PERCY_TOKEN in secrets
 https://percy.io/f896bbdc/hivemq-edge

@@ -87,4 +87,6 @@ jobs:
 
       - name: 📸 Run Percy visual tests
         run: pnpm cypress:percy
+        env:
+          PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
 
