@@ -1,7 +1,7 @@
 {
   "ci": {
     "collect": {
-      "staticDistDir": "./dist"
+      "staticDistDir": "hivemq-edge/src/frontend/dist"
     }
   }
 }
