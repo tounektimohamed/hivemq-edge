@@ -97,5 +97,5 @@ jobs:
           temporaryPublicStorage: true # upload lighthouse report to the temporary storage
           ## budgetPath: ./budget.json # test performance budgets
           uploadArtifacts: true # save results as an action artifacts
-          configPath: 'hivemq-edge/src/frontend/lighthouserc.json'
+          configPath: 'hivemq-edge/src/frontend/.lighthouserc.json'
           ## /Users/nicolas/IdeaProjects/hivemq-edge/hivemq-edge/src/frontend/.lighthouserc.json

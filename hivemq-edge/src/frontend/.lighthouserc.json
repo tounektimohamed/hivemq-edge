@@ -1,0 +1,13 @@
+{
+  "ci": {
+    "collect": {
+      "staticDistDir": "hivemq-edge/src/frontend/dist",
+      "url": ["http://localhost/app"],
+      "isSinglePageApplication": true,
+      "numberOfRuns": 1
+    },
+    "assert": {
+      "preset": "lighthouse:recommended"
+    }
+  }
+}
