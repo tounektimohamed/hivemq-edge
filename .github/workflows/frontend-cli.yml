@@ -107,6 +107,3 @@ jobs:
           echo "Accessibility: ${{ fromJSON(steps.lighthouse.outputs.manifest)[0].summary.accessibility }}" >> $GITHUB_STEP_SUMMARY
           echo "Best-practices: ${{ fromJSON(steps.lighthouse.outputs.manifest)[0].summary.best-practices }}" >> $GITHUB_STEP_SUMMARY
           echo "SEO: ${{ fromJSON(steps.lighthouse.outputs.manifest)[0].summary.seo }}" >> $GITHUB_STEP_SUMMARY
-          echo ' ' >> $GITHUB_STEP_SUMMARY
-          echo "[Visit documentation](${{ fromJSON(steps.lighthouse.outputs.manifest)[0].htmlPath }})" >> $GITHUB_STEP_SUMMARY
-          echo "[Log in to Deploy Now](https://ionos.space/)" >> $GITHUB_STEP_SUMMARY
