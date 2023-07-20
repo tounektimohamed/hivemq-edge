@@ -10,7 +10,7 @@ module.exports = {
       staticDistDir: 'hivemq-edge/src/frontend/dist',
       url: ['http://localhost/app/login'],
       isSinglePageApplication: true,
-      numberOfRuns: 1,
+      numberOfRuns: 3,
       settings: {
         preset: 'desktop',
         onlyCategories: ['performance', 'accessibility', 'best-practices', 'seo'],
