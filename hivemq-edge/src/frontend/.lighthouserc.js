@@ -34,8 +34,5 @@ module.exports = {
     server: {
       // server options here
     },
-    wizard: {
-      // wizard options here
-    },
   },
 }
