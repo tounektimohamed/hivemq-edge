@@ -125,5 +125,3 @@ PERCY_TOKEN in secrets
 https://percy.io/f896bbdc/hivemq-edge
 
 ### Lighthouse - performance
-
-Pay attention to path!
