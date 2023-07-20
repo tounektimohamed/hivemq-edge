@@ -1,7 +1,9 @@
 {
   "ci": {
     "collect": {
-      "staticDistDir": "hivemq-edge/src/frontend/dist"
+      "staticDistDir": "hivemq-edge/src/frontend/dist",
+      "url": ["http://localhost/app"],
+      "isSinglePageApplication": true
     }
   }
 }
