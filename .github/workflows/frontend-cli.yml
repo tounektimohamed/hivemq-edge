@@ -90,7 +90,7 @@ jobs:
 #        env:
 #          PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
 
-      - name: Audit URL using Lighthouse
+      - name: 🚥 Run Lighthouse audits
         uses: treosh/lighthouse-ci-action@v10
         id: lighthouse
         with:
@@ -98,4 +98,3 @@ jobs:
           ## budgetPath: ./budget.json # test performance budgets
           uploadArtifacts: true # save results as an action artifacts
           configPath: 'hivemq-edge/src/frontend/.lighthouserc.cjs'
-          ## /Users/nicolas/IdeaProjects/hivemq-edge/hivemq-edge/src/frontend/.lighthouserc.json
