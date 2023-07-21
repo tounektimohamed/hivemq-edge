@@ -126,4 +126,4 @@ https://percy.io/f896bbdc/hivemq-edge
 
 ### Lighthouse - performance
 
-Test 2
+Test
