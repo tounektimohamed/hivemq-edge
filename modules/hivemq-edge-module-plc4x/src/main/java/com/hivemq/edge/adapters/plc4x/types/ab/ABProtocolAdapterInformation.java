@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hivemq.edge.adapters.plc4x.types.siemens;
+package com.hivemq.edge.adapters.plc4x.types.ab;
 
 import com.hivemq.edge.modules.adapters.ProtocolAdapterConstants;
+import com.hivemq.edge.modules.adapters.impl.AbstractProtocolAdapterInformation;
 import com.hivemq.edge.modules.api.adapters.ProtocolAdapterCapability;
 import com.hivemq.edge.modules.api.adapters.ProtocolAdapterInformation;
 import com.hivemq.edge.modules.config.CustomConfig;
-import com.hivemq.edge.modules.adapters.impl.AbstractProtocolAdapterInformation;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import java.util.List;
@@ -27,32 +27,32 @@ import java.util.List;
 /**
  * @author HiveMQ Adapter Generator
  */
-public class Step7ProtocolAdapterInformation
+public class ABProtocolAdapterInformation
     extends AbstractProtocolAdapterInformation {
 
-    public static final ProtocolAdapterInformation INSTANCE = new Step7ProtocolAdapterInformation();
+    public static final ProtocolAdapterInformation INSTANCE = new ABProtocolAdapterInformation();
 
-    protected Step7ProtocolAdapterInformation() {
+    protected ABProtocolAdapterInformation() {
     }
 
     @Override
     public @NotNull String getProtocolName() {
-        return "Step 7";
+        return "Allen Bradley Ethernet";
     }
 
     @Override
     public @NotNull String getProtocolId() {
-        return "step7";
+        return "ab-eth";
     }
 
     @Override
     public @NotNull String getDisplayName() {
-        return "Step 7 to MQTT Protocol Adapter";
+        return "Allen Bradley Ethernet to MQTT Protocol Adapter";
     }
 
     @Override
     public @NotNull String getDescription() {
-        return "Connects HiveMQ Edge to existing Step 7 Compliant devices, bringing data from the PLC into MQTT.";
+        return "Connects HiveMQ Edge to existing Allen Bradley Ethernet compliant devices, bringing data from the PLC into MQTT.";
     }
 
     @Override
@@ -79,6 +79,6 @@ public class Step7ProtocolAdapterInformation
 
     @Override
     public @NotNull Class<? extends CustomConfig> getConfigClass() {
-        return Step7AdapterConfig.class;
+        return ABAdapterConfig.class;
     }
 }

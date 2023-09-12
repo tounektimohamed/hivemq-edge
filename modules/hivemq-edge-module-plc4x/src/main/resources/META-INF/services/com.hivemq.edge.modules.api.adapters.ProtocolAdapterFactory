@@ -1,1 +1,3 @@
+com.hivemq.edge.adapters.plc4x.types.ab.ABProtocolAdapterFactory
+com.hivemq.edge.adapters.plc4x.types.bacnet.BacnetAdapterFactory
 com.hivemq.edge.adapters.plc4x.types.siemens.Step7ProtocolAdapterFactory

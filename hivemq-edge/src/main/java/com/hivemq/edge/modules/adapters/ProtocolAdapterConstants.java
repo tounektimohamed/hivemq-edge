@@ -26,6 +26,8 @@ public interface ProtocolAdapterConstants {
         SERIAL,
         INTERNET,
         WEB,
+        AUTOMATION,
+        FACTORY,
         IOT
     }
 

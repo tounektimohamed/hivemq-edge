@@ -13,37 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hivemq.edge.adapters.plc4x.model;
+package com.hivemq.edge.adapters.plc4x.types.bacnet;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hivemq.edge.modules.config.CustomConfig;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 
-/**
- * @author HiveMQ Adapter Generator
- */
-public class Plc4xData<T extends Plc4xAdapterConfig.Subscription> {
+import java.util.Map;
 
-    private final T subscription;
-    private final long systemTime;
-    private byte[] data;
+public class BacnetConfigConverter {
 
-    public Plc4xData(final @NotNull T subscription) {
-        this.subscription = subscription;
-        this.systemTime = System.currentTimeMillis();
+    public static @NotNull BacnetAdapterConfig convertConfig(final ObjectMapper objectMapper, final @NotNull Map<String, Object> config) {
+        return objectMapper.convertValue(config, BacnetAdapterConfig.class);
     }
 
-    public long getSystemTime() {
-        return systemTime;
-    }
-
-    public byte[] getData() {
-        return data;
-    }
-
-    public void setData(byte[] data) {
-        this.data = data;
-    }
-
-    public T getSubscription() {
-        return subscription;
+    public static @NotNull Map<String, Object> unconvertConfig(final ObjectMapper objectMapper, final @NotNull CustomConfig config) {
+        return objectMapper.convertValue(config, Map.class);
     }
 }

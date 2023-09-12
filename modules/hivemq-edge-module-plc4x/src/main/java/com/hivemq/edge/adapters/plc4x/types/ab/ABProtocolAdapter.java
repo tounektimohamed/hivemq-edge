@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hivemq.edge.adapters.plc4x.types.siemens;
+package com.hivemq.edge.adapters.plc4x.types.ab;
 
 import com.codahale.metrics.MetricRegistry;
 import com.hivemq.edge.adapters.plc4x.impl.AbstractPlc4xAdapter;
@@ -22,22 +22,22 @@ import com.hivemq.edge.modules.api.adapters.ProtocolAdapterInformation;
 /**
  * @author HiveMQ Adapter Generator
  */
-public class Step7ProtocolAdapter extends AbstractPlc4xAdapter<Step7AdapterConfig> {
+public class ABProtocolAdapter extends AbstractPlc4xAdapter<ABAdapterConfig> {
 
-    public Step7ProtocolAdapter(
+    public ABProtocolAdapter(
             final ProtocolAdapterInformation adapterInformation,
-            final Step7AdapterConfig adapterConfig,
+            final ABAdapterConfig adapterConfig,
             final MetricRegistry metricRegistry) {
         super(adapterInformation, adapterConfig, metricRegistry);
     }
 
     @Override
     protected String getProtocolHandler() {
-        return "s7";
+        return "ab-eth";
     }
 
     @Override
-    protected AbstractPlc4xAdapter.ReadType getReadType() {
+    protected ReadType getReadType() {
         return ReadType.Read;
     }
 }
