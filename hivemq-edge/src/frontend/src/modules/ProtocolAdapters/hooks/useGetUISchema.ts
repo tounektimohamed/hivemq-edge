@@ -9,7 +9,7 @@ const useGetUiSchema = (isNewAdapter = true) => {
     {
       id: 'coreFields',
       title: t('protocolAdapter.uiSchema.groups.coreFields'),
-      children: ['id', 'port', 'host', 'uri', 'url', 'pollingIntervalMillis'],
+      children: ['id', 'port', 'host', 'uri', 'url', 'pollingIntervalMillis','controllerType','remoteRack','remoteSlot'],
     },
     {
       id: 'subFields',
@@ -30,6 +30,11 @@ const useGetUiSchema = (isNewAdapter = true) => {
       id: 'authentication',
       title: t('protocolAdapter.uiSchema.groups.authentication'),
       children: ['auth'],
+    },
+    {
+      id: 's7advanced',
+      title: t('protocolAdapter.uiSchema.groups.s7advanced'),
+      children: ['ping','pingTime', 'maxAmqCaller', 'maxAmqCallee', 'remoteTsap', 'remoteRack2', 'remoteSlot2', 'pduSize', 'retryTime', 'retryTimeout', 'retryTime', 'retryTime'],
     },
     {
       id: 'http',

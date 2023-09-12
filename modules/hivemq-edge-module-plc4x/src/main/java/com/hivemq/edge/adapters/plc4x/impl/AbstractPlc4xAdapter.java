@@ -1,11 +1,9 @@
 package com.hivemq.edge.adapters.plc4x.impl;
 
 import com.codahale.metrics.MetricRegistry;
-import com.hivemq.api.model.events.Event;
 import com.hivemq.edge.adapters.plc4x.Plc4xException;
 import com.hivemq.edge.adapters.plc4x.model.Plc4xAdapterConfig;
 import com.hivemq.edge.adapters.plc4x.model.Plc4xData;
-import com.hivemq.edge.adapters.plc4x.types.siemens.Step7AdapterConfig;
 import com.hivemq.edge.modules.adapters.ProtocolAdapterException;
 import com.hivemq.edge.modules.adapters.impl.AbstractProtocolAdapter;
 import com.hivemq.edge.modules.adapters.params.ProtocolAdapterStartInput;
@@ -19,15 +17,16 @@ import com.hivemq.mqtt.handler.publish.PublishReturnCode;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.plc4x.java.PlcDriverManager;
 import org.apache.plc4x.java.api.messages.PlcReadResponse;
-import org.apache.plc4x.java.api.messages.PlcResponse;
 import org.apache.plc4x.java.api.messages.PlcSubscriptionEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 /**
  * @author Simon L Johnson
@@ -77,12 +76,14 @@ public abstract class AbstractPlc4xAdapter<T extends Plc4xAdapterConfig>
             synchronized (lock) {
                 if (connection == null) {
                     log.info("Creating new Instance Of Plc4x Connector with {}", adapterConfig);
-                    connection = new Plc4xConnection(driverManager, adapterConfig, true) {
+                    connection = new Plc4xConnection<>(driverManager, adapterConfig,
+                            plc4xAdapterConfig -> Plc4xDataUtils.createQueryString(createQueryStringParams(plc4xAdapterConfig), true), true) {
                         @Override
                         protected String getProtocol() {
                             return getProtocolHandler();
                         }
                     };
+                    connection.initConnection();
                 }
             }
         }
@@ -122,7 +123,7 @@ public abstract class AbstractPlc4xAdapter<T extends Plc4xAdapterConfig>
                     }
                     connection.subscribe(subscription,
                             plcSubscriptionEvent ->
-                                    processSubscriptionResponse(subscription, plcSubscriptionEvent));
+                                    processSubscriptionResponse(subscription, (PlcSubscriptionEvent) plcSubscriptionEvent));
                     break;
                 case Read:
                     if(log.isDebugEnabled()){
@@ -160,7 +161,7 @@ public abstract class AbstractPlc4xAdapter<T extends Plc4xAdapterConfig>
 
     protected void processSubscriptionResponse(final @NotNull T.Subscription subscription,
                                                final @NotNull PlcSubscriptionEvent subscriptionEvent){
-
+        processPlcFieldData(subscription, Plc4xDataUtils.readDataFromSubscriptionEvent(subscriptionEvent));
     }
 
     protected void processReadResponse(final @NotNull T.Subscription subscription,
@@ -204,10 +205,12 @@ public abstract class AbstractPlc4xAdapter<T extends Plc4xAdapterConfig>
             if (connection.isConnected()) {
                 connection.read(subscription,
                         plcResponse ->
-                                AbstractPlc4xAdapter.this.processReadResponse(subscription, plcResponse));
+                                processReadResponse(subscription, (PlcReadResponse) plcResponse));
             }
         }
     }
+
+
 
     /**
      * The protocol Handler is the prefix of the JNDI Connection URI used to instantiate the connection from the factory
@@ -220,4 +223,19 @@ public abstract class AbstractPlc4xAdapter<T extends Plc4xAdapterConfig>
      * @return Decides on the mode of reading data from the underlying connection
      */
     protected abstract ReadType getReadType();
+
+
+    /**
+     * Hook method used to populate the URL query parameters on the connection string from
+     * the supplied configuration. For example;
+     * ?remote-rack=0&remote-slot=3. Each value in the returned map will be encoded onto
+     * the final connection string.
+     */
+    protected Map<String, String> createQueryStringParams(@NotNull final T config){
+        return Collections.emptyMap();
+    }
+
+    public static String nullSafe(final @Nullable Object o){
+        return Objects.toString(o, null);
+    }
 }

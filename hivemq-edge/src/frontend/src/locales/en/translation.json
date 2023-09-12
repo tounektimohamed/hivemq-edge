@@ -432,7 +432,8 @@
         "security": "Security",
         "publishing": "Publishing",
         "http": "HTTP",
-        "authentication": "Authentication"
+        "authentication": "Authentication",
+        "s7advanced": "S7 Advanced"
       }
     }
   },

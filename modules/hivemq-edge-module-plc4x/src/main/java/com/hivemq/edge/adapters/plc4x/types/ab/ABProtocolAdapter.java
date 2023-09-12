@@ -19,6 +19,9 @@ import com.codahale.metrics.MetricRegistry;
 import com.hivemq.edge.adapters.plc4x.impl.AbstractPlc4xAdapter;
 import com.hivemq.edge.modules.api.adapters.ProtocolAdapterInformation;
 
+import java.util.Collections;
+import java.util.Map;
+
 /**
  * @author HiveMQ Adapter Generator
  */

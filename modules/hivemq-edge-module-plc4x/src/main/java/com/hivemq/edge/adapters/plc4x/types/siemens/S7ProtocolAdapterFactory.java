@@ -28,31 +28,31 @@ import java.util.Map;
 /**
  * @author HiveMQ Adapter Generator
  */
-public class Step7ProtocolAdapterFactory implements ProtocolAdapterFactory<Step7AdapterConfig> {
+public class S7ProtocolAdapterFactory implements ProtocolAdapterFactory<S7AdapterConfig> {
 
     @Override
     public @NotNull ProtocolAdapterInformation getInformation() {
-        return Step7ProtocolAdapterInformation.INSTANCE;
+        return S7ProtocolAdapterInformation.INSTANCE;
     }
 
     @Override
-    public @NotNull ProtocolAdapter createAdapter(@NotNull final ProtocolAdapterInformation adapterInformation, @NotNull final ProtocolAdapterInput<Step7AdapterConfig> input) {
-        return new Step7ProtocolAdapter(adapterInformation, input.getConfig(), input.getMetricRegistry());
+    public @NotNull ProtocolAdapter createAdapter(@NotNull final ProtocolAdapterInformation adapterInformation, @NotNull final ProtocolAdapterInput<S7AdapterConfig> input) {
+        return new S7ProtocolAdapter(adapterInformation, input.getConfig(), input.getMetricRegistry());
     }
 
     @Override
-    public @NotNull Step7AdapterConfig convertConfigObject(final @NotNull ObjectMapper objectMapper, final @NotNull Map<@NotNull String, Object> config) {
-        return Step7ConfigConverter.convertConfig(objectMapper, config);
+    public @NotNull S7AdapterConfig convertConfigObject(final @NotNull ObjectMapper objectMapper, final @NotNull Map<@NotNull String, Object> config) {
+        return S7ConfigConverter.convertConfig(objectMapper, config);
     }
 
     @Override
     public Map<String, Object> unconvertConfigObject(final @NotNull ObjectMapper objectMapper, final CustomConfig config) {
-        return Step7ConfigConverter.unconvertConfig(objectMapper, config);
+        return S7ConfigConverter.unconvertConfig(objectMapper, config);
     }
 
     @Override
-    public @NotNull Class<Step7AdapterConfig> getConfigClass() {
-        return Step7AdapterConfig.class;
+    public @NotNull Class<S7AdapterConfig> getConfigClass() {
+        return S7AdapterConfig.class;
     }
 
 }
