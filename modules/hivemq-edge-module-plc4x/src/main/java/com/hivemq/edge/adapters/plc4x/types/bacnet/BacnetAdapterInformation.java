@@ -58,7 +58,7 @@ public class BacnetAdapterInformation
 
     @Override
     public String getVersion() {
-        return super.getVersion() + " BETA";
+        return super.getVersion() + " (BETA)";
     }
 
     @Override

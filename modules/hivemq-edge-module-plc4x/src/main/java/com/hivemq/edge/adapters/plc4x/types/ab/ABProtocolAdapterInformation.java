@@ -57,7 +57,7 @@ public class ABProtocolAdapterInformation
 
     @Override
     public String getVersion() {
-        return super.getVersion() + " BETA";
+        return super.getVersion() + " (BETA)";
     }
 
     @Override
