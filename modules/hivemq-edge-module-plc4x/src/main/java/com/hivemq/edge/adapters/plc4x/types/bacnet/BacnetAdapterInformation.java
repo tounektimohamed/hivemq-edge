@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hivemq.edge.adapters.plc4x.types.siemens;
+package com.hivemq.edge.adapters.plc4x.types.bacnet;
 
+import com.hivemq.api.model.adapters.ProtocolAdapter;
 import com.hivemq.edge.modules.adapters.ProtocolAdapterConstants;
+import com.hivemq.edge.modules.adapters.impl.AbstractProtocolAdapterInformation;
 import com.hivemq.edge.modules.api.adapters.ProtocolAdapterCapability;
 import com.hivemq.edge.modules.api.adapters.ProtocolAdapterInformation;
 import com.hivemq.edge.modules.config.CustomConfig;
-import com.hivemq.edge.modules.adapters.impl.AbstractProtocolAdapterInformation;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import java.util.List;
@@ -27,32 +28,32 @@ import java.util.List;
 /**
  * @author HiveMQ Adapter Generator
  */
-public class Step7ProtocolAdapterInformation
+public class BacnetAdapterInformation
     extends AbstractProtocolAdapterInformation {
 
-    public static final ProtocolAdapterInformation INSTANCE = new Step7ProtocolAdapterInformation();
+    public static final ProtocolAdapterInformation INSTANCE = new BacnetAdapterInformation();
 
-    protected Step7ProtocolAdapterInformation() {
+    protected BacnetAdapterInformation() {
     }
 
     @Override
     public @NotNull String getProtocolName() {
-        return "Step 7";
+        return "BACnet";
     }
 
     @Override
     public @NotNull String getProtocolId() {
-        return "step7";
+        return "bacnet";
     }
 
     @Override
     public @NotNull String getDisplayName() {
-        return "Step 7 to MQTT Protocol Adapter";
+        return "BACnet to MQTT Protocol Adapter";
     }
 
     @Override
     public @NotNull String getDescription() {
-        return "Connects HiveMQ Edge to existing Step 7 Compliant devices, bringing data from the PLC into MQTT.";
+        return "Connects HiveMQ Edge to existing BACnet compliant devices, bringing data from the PLC into MQTT.";
     }
 
     @Override
@@ -62,14 +63,14 @@ public class Step7ProtocolAdapterInformation
 
     @Override
     public ProtocolAdapterConstants.CATEGORY getCategory() {
-        return ProtocolAdapterConstants.CATEGORY.INDUSTRIAL;
+        return ProtocolAdapterConstants.CATEGORY.BUILDING_AUTOMATION;
     }
 
     @Override
     public List<ProtocolAdapterConstants.TAG> getTags() {
         return List.of(ProtocolAdapterConstants.TAG.TCP,
                 ProtocolAdapterConstants.TAG.AUTOMATION,
-                ProtocolAdapterConstants.TAG.FACTORY);
+                ProtocolAdapterConstants.TAG.IOT);
     }
 
     @Override
@@ -79,6 +80,6 @@ public class Step7ProtocolAdapterInformation
 
     @Override
     public @NotNull Class<? extends CustomConfig> getConfigClass() {
-        return Step7AdapterConfig.class;
+        return BacnetAdapterConfig.class;
     }
 }

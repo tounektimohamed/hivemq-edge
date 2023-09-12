@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hivemq.edge.adapters.plc4x.types.siemens;
+package com.hivemq.edge.adapters.plc4x.types.bacnet;
 
 import com.codahale.metrics.MetricRegistry;
 import com.hivemq.edge.adapters.plc4x.impl.AbstractPlc4xAdapter;
@@ -22,22 +22,22 @@ import com.hivemq.edge.modules.api.adapters.ProtocolAdapterInformation;
 /**
  * @author HiveMQ Adapter Generator
  */
-public class Step7ProtocolAdapter extends AbstractPlc4xAdapter<Step7AdapterConfig> {
+public class BacnetProtocolAdapter extends AbstractPlc4xAdapter<BacnetAdapterConfig> {
 
-    public Step7ProtocolAdapter(
+    public BacnetProtocolAdapter(
             final ProtocolAdapterInformation adapterInformation,
-            final Step7AdapterConfig adapterConfig,
+            final BacnetAdapterConfig adapterConfig,
             final MetricRegistry metricRegistry) {
         super(adapterInformation, adapterConfig, metricRegistry);
     }
 
     @Override
     protected String getProtocolHandler() {
-        return "s7";
+        return "bacnet";
     }
 
     @Override
-    protected AbstractPlc4xAdapter.ReadType getReadType() {
+    protected ReadType getReadType() {
         return ReadType.Read;
     }
 }

@@ -40,6 +40,13 @@ public class Plc4xAdapterConfig extends AbstractProtocolAdapterConfig {
             format = ModuleConfigField.FieldType.HOSTNAME)
     private @NotNull String host;
 
+    @JsonProperty("resourcePath")
+    @ModuleConfigField(title = "Resource Path",
+                       description = "The resource path on the device to connect to",
+                       required = true,
+                       format = ModuleConfigField.FieldType.URI)
+    private @NotNull String resourcePath;
+
     @JsonProperty("publishingInterval")
     @ModuleConfigField(title = "Publishing interval [ms]",
             description = "Publishing interval in milliseconds for this subscription on the server",
@@ -55,11 +62,11 @@ public class Plc4xAdapterConfig extends AbstractProtocolAdapterConfig {
             defaultValue = "10")
     private int maxPollingErrorsBeforeRemoval = DEFAULT_MAX_POLLING_ERROR_BEFORE_REMOVAL;
 
-    @JsonProperty("publishChangedDataOnly")
-    @ModuleConfigField(title = "Only publish data items that have changed since last poll",
-            defaultValue = "true",
-            format = ModuleConfigField.FieldType.BOOLEAN)
-    private boolean publishChangedDataOnly = true;
+//    @JsonProperty("publishChangedDataOnly")
+//    @ModuleConfigField(title = "Only publish data items that have changed since last poll",
+//            defaultValue = "true",
+//            format = ModuleConfigField.FieldType.BOOLEAN)
+//    private boolean publishChangedDataOnly = true;
 
     @JsonProperty("subscriptions")
     @ModuleConfigField(title = "Subscriptions",
@@ -69,14 +76,17 @@ public class Plc4xAdapterConfig extends AbstractProtocolAdapterConfig {
     public Plc4xAdapterConfig() {
     }
 
-    public boolean getPublishChangedDataOnly() {
-        return publishChangedDataOnly;
-    }
+//    public boolean getPublishChangedDataOnly() {
+//        return publishChangedDataOnly;
+//    }
 
     public int getMaxPollingErrorsBeforeRemoval() {
         return maxPollingErrorsBeforeRemoval;
     }
 
+    public String getResourcePath() {
+        return resourcePath;
+    }
 
     public int getPort() {
         return port;
