@@ -16,6 +16,7 @@
 package com.hivemq.edge.adapters.plc4x.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.hivemq.edge.modules.adapters.annotations.ModuleConfigField;
 import com.hivemq.edge.modules.config.impl.AbstractProtocolAdapterConfig;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -39,13 +40,6 @@ public class Plc4xAdapterConfig extends AbstractProtocolAdapterConfig {
             required = true,
             format = ModuleConfigField.FieldType.HOSTNAME)
     private @NotNull String host;
-
-    @JsonProperty("resourcePath")
-    @ModuleConfigField(title = "Resource Path",
-                       description = "The resource path on the device to connect to",
-                       required = true,
-                       format = ModuleConfigField.FieldType.URI)
-    private @NotNull String resourcePath;
 
     @JsonProperty("publishingInterval")
     @ModuleConfigField(title = "Publishing interval [ms]",
@@ -84,10 +78,6 @@ public class Plc4xAdapterConfig extends AbstractProtocolAdapterConfig {
         return maxPollingErrorsBeforeRemoval;
     }
 
-    public String getResourcePath() {
-        return resourcePath;
-    }
-
     public int getPort() {
         return port;
     }
@@ -104,14 +94,28 @@ public class Plc4xAdapterConfig extends AbstractProtocolAdapterConfig {
         return subscriptions;
     }
 
+    @JsonPropertyOrder({"tagName", "tagAddress", "destination", "qos"})
     public static class Subscription extends AbstractProtocolAdapterConfig.Subscription {
 
-        @JsonProperty("tag-name")
+        @JsonProperty(value = "tagName", required = true)
+        @ModuleConfigField(title = "Tag Name",
+                           description = "The name to assign to this address",
+                           required = true,
+                           format = ModuleConfigField.FieldType.IDENTIFIER)
         private @NotNull String tagName;
 
+        @JsonProperty("tagAddress")
+        @ModuleConfigField(title = "Tag Address",
+                           description = "The well formed address of the tag to read",
+                           required = true)
+        private @NotNull String tagAddress;
 
         public @NotNull String getTagName() {
             return tagName;
+        }
+
+        public String getTagAddress() {
+            return tagAddress;
         }
     }
 }

@@ -1,21 +1,28 @@
 package com.hivemq.edge.adapters.plc4x.impl;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.mqtt.message.publish.PUBLISH;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.plc4x.java.api.messages.PlcReadResponse;
 import org.apache.plc4x.java.api.messages.PlcSubscriptionEvent;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * //TODO this needs work!
  */
 public class Plc4xDataUtils {
     private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
+    private final static String AMP = "&";
+    private final static String EQUALS = "=";
+    private final static String QUESTION = "?";
 
     public static String toHex(final @NotNull byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
@@ -76,4 +83,21 @@ public class Plc4xDataUtils {
         return output;
     }
 
+
+    public static final String createQueryString(final @NotNull Map<String, String> map, boolean includeKeysForNullValues){
+        StringBuilder res = new StringBuilder();
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            if (res.length() > 0) {
+                res.append(AMP);
+            }
+            if(entry.getValue() != null || includeKeysForNullValues){
+                res.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8))
+                        .append(EQUALS);
+                if(entry.getKey() != null){
+                    res.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
+                }
+            }
+        }
+        return res.toString();
+    }
 }

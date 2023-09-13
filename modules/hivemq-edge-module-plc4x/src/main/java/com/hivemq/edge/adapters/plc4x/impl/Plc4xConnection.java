@@ -9,7 +9,6 @@ import org.apache.plc4x.java.api.PlcConnection;
 import org.apache.plc4x.java.api.exceptions.PlcConnectionException;
 import org.apache.plc4x.java.api.messages.PlcReadRequest;
 import org.apache.plc4x.java.api.messages.PlcReadResponse;
-import org.apache.plc4x.java.api.messages.PlcResponse;
 import org.apache.plc4x.java.api.messages.PlcSubscriptionEvent;
 import org.apache.plc4x.java.api.messages.PlcSubscriptionRequest;
 import org.apache.plc4x.java.api.messages.PlcSubscriptionResponse;
@@ -17,22 +16,27 @@ import org.apache.plc4x.java.api.model.PlcSubscriptionHandle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-public abstract class Plc4xConnection {
+public abstract class Plc4xConnection<T extends Plc4xAdapterConfig> {
 
     private static final Logger log = LoggerFactory.getLogger(Plc4xConnection.class);
     private final Object lock = new Object();
 
-    private @NotNull PlcDriverManager plcDriverManager;
-    private @NotNull Plc4xAdapterConfig config;
+    private final @NotNull PlcDriverManager plcDriverManager;
+    private final @NotNull T config;
+    private final @NotNull Plc4xConnectionQueryStringProvider connectionQueryStringProvider;
     protected volatile PlcConnection plcConnection;
 
-    public Plc4xConnection(final @NotNull PlcDriverManager plcDriverManager,
-                           final @NotNull Plc4xAdapterConfig config, final boolean lazy) throws Plc4xException {
+    public  Plc4xConnection(final @NotNull PlcDriverManager plcDriverManager,
+                           final @NotNull T config,
+                           final @NotNull Plc4xConnectionQueryStringProvider<T> connectionQueryStringProvider,
+                           final boolean lazy) throws Plc4xException {
         this.plcDriverManager = plcDriverManager;
         this.config = config;
+        this.connectionQueryStringProvider = connectionQueryStringProvider;
         if(!validConfiguration(config)){
             if(log.isDebugEnabled()){
                 log.debug("Configuration provided to Plc4X connection was considered invalid by implementation");
@@ -44,22 +48,20 @@ public abstract class Plc4xConnection {
         }
     }
 
-    protected String createConnectionString(final @NotNull Plc4xAdapterConfig config){
-        //opcua:tcp://Simons-Laptop.broadband:53530/OPCUA/SimulationServer
-
-        if(config.getResourcePath() != null && !config.getResourcePath().trim().equals("")){
-            return String.format("%s://%s:%s/%s",
+    protected String createConnectionString(final @NotNull T config){
+        String queryString = connectionQueryStringProvider.getConnectionQueryString(config);
+        if(queryString != null && !queryString.trim().equals("")){
+            return String.format("%s://%s:%s?%s",
                     getProtocol().trim(),
                     config.getHost().trim(),
                     config.getPort(),
-                    config.getResourcePath().trim());
+                    queryString.trim());
         } else {
             return String.format("%s://%s:%s",
                     getProtocol().trim(),
                     config.getHost().trim(),
                     config.getPort());
         }
-
     }
 
     protected void initConnection() throws Plc4xException {
@@ -101,7 +103,7 @@ public abstract class Plc4xConnection {
                 plcConnection.isConnected();
     }
 
-    public void read(final @NotNull Plc4xAdapterConfig.Subscription subscription, final @NotNull Consumer<PlcReadResponse> responseConsumer) throws Plc4xException{
+    public void read(final @NotNull T.Subscription subscription, final @NotNull Consumer<PlcReadResponse> responseConsumer) throws Plc4xException{
         initConnection();
         if (!plcConnection.getMetadata().canRead()) {
             throw new Plc4xException("connection type cannot read-blocking");
@@ -117,7 +119,7 @@ public abstract class Plc4xConnection {
         });
     }
 
-    public void subscribe(final @NotNull Plc4xAdapterConfig.Subscription subscription, final @NotNull Consumer<PlcSubscriptionEvent> consumer)
+    public void subscribe(final @NotNull T.Subscription subscription, final @NotNull Consumer<PlcSubscriptionEvent> consumer)
             throws Plc4xException {
         initConnection();
         if (!plcConnection.getMetadata().canSubscribe()) {
@@ -145,14 +147,15 @@ public abstract class Plc4xConnection {
     }
 
     /**
-     * Use this hook method to modify the query generated used to read|subscribe to the devices
+     * Use this hook method to modify the query generated used to read|subscribe to the devices,
+     * for the most part this is simply the tagAddress field unchanged from the subscription
      */
-    protected String initializeQueryForSubscription(@NotNull final Plc4xAdapterConfig.Subscription subscription){
-        return subscription.getTagName();
+    protected String initializeQueryForSubscription(@NotNull final T.Subscription subscription){
+        return subscription.getTagAddress();
     }
 
-    protected boolean validConfiguration(@NotNull final Plc4xAdapterConfig config){
-        return config.getResourcePath() != null && config.getHost() != null && config.getPort() > 0 && config.getPort() <
+    protected boolean validConfiguration(@NotNull final T config){
+        return config.getHost() != null && config.getPort() > 0 && config.getPort() <
                 HiveMQEdgeConstants.MAX_UINT16;
     }
 
@@ -160,37 +163,4 @@ public abstract class Plc4xConnection {
      * Concrete implementations should provide the protocol with which they are connecting
      */
     protected abstract String getProtocol();
-
-    /**
-     *                 //                    event -> {
-     *                 ////                        List<Pair<String, byte[]>> l = Plc4xUtils.getDataFromSubscriptionEvent(event);
-     *                 ////                        processPlcFieldData(l);
-     *                 //                    }
-     *                 //            );
-     */
-
-
-//    protected void processPlcFieldData(List<Pair<String, byte[]>> l){
-//        for (Pair<String, byte[]> p : l) {
-//            if (p.getRight() != null && p.getRight().length > 0) {
-//                try {
-//                    logger.info("received field {} from plc -> {}", p.getLeft(),
-//                            MqttsnWireUtils.toHex(p.getRight()));
-//                    receiveExternal(context, p.getLeft(), 1, p.getRight());
-//                } catch (Exception e) {
-//                    logger.error("error receiving bytes from plc -> {}", p.getLeft(), e);
-//                }
-//            }
-//        }
-//    }
-
-
-
-//    private static byte[] convert(Byte[] oBytes) {
-//        byte[] bytes = new byte[oBytes.length];
-//        for(int i = 0; i < oBytes.length; i++) {
-//            bytes[i] = oBytes[i];
-//        }
-//        return bytes;
-//    }
 }

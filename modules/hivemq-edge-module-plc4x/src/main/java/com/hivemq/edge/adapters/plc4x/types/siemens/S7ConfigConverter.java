@@ -21,10 +21,10 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import java.util.Map;
 
-public class Step7ConfigConverter {
+public class S7ConfigConverter {
 
-    public static @NotNull Step7AdapterConfig convertConfig(final ObjectMapper objectMapper, final @NotNull Map<String, Object> config) {
-        return objectMapper.convertValue(config, Step7AdapterConfig.class);
+    public static @NotNull S7AdapterConfig convertConfig(final ObjectMapper objectMapper, final @NotNull Map<String, Object> config) {
+        return objectMapper.convertValue(config, S7AdapterConfig.class);
     }
 
     public static @NotNull Map<String, Object> unconvertConfig(final ObjectMapper objectMapper, final @NotNull CustomConfig config) {

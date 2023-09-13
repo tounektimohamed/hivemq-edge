@@ -27,37 +27,37 @@ import java.util.List;
 /**
  * @author HiveMQ Adapter Generator
  */
-public class Step7ProtocolAdapterInformation
+public class S7ProtocolAdapterInformation
     extends AbstractProtocolAdapterInformation {
 
-    public static final ProtocolAdapterInformation INSTANCE = new Step7ProtocolAdapterInformation();
+    public static final ProtocolAdapterInformation INSTANCE = new S7ProtocolAdapterInformation();
 
-    protected Step7ProtocolAdapterInformation() {
+    protected S7ProtocolAdapterInformation() {
     }
 
     @Override
     public @NotNull String getProtocolName() {
-        return "Step 7";
+        return "S7";
     }
 
     @Override
     public @NotNull String getProtocolId() {
-        return "step7";
+        return "s7";
     }
 
     @Override
     public @NotNull String getDisplayName() {
-        return "Step 7 to MQTT Protocol Adapter";
+        return "S7 to MQTT Protocol Adapter";
     }
 
     @Override
     public @NotNull String getDescription() {
-        return "Connects HiveMQ Edge to existing Step 7 Compliant devices, bringing data from the PLC into MQTT.";
+        return "Connects HiveMQ Edge to S7-300, S7-400, S7-1200 & S7-1500 devices, reading data from the PLC into MQTT.";
     }
 
     @Override
     public String getVersion() {
-        return super.getVersion() + " (BETA)";
+        return super.getVersion() + " (ALPHA)";
     }
 
     @Override
@@ -79,6 +79,6 @@ public class Step7ProtocolAdapterInformation
 
     @Override
     public @NotNull Class<? extends CustomConfig> getConfigClass() {
-        return Step7AdapterConfig.class;
+        return S7AdapterConfig.class;
     }
 }

@@ -1,46 +1,45 @@
-import { UITab } from '@/modules/ProtocolAdapters/types.ts'
+import { UIGroup } from '@/modules/ProtocolAdapters/types.ts'
 import { useTranslation } from 'react-i18next'
 import { UiSchema } from '@rjsf/utils'
 
 const useGetUiSchema = (isNewAdapter = true) => {
   const { t } = useTranslation()
 
-  const tabs: UITab[] = [
+  const groups: UIGroup[] = [
     {
       id: 'coreFields',
       title: t('protocolAdapter.uiSchema.groups.coreFields'),
-      properties: ['id', 'port', 'host', 'uri', 'url', 'pollingIntervalMillis'],
+      children: ['id', 'port', 'host', 'uri', 'url', 'pollingIntervalMillis','controllerType','remoteRack','remoteSlot'],
     },
     {
       id: 'subFields',
       title: 'Subscription',
-      properties: ['subscriptions'],
+      children: ['subscriptions'],
     },
     {
       id: 'security',
       title: t('protocolAdapter.uiSchema.groups.security'),
-      properties: ['security', 'tls'],
+      children: ['security', 'tls'],
     },
     {
       id: 'publishing',
       title: t('protocolAdapter.uiSchema.groups.publishing'),
-      properties: [
-        'maxPollingErrorsBeforeRemoval',
-        'publishChangedDataOnly',
-        'publishingInterval',
-        'destination',
-        'qos',
-      ],
+      children: ['maxPollingErrorsBeforeRemoval', 'publishChangedDataOnly', 'publishingInterval', 'destination', 'qos'],
     },
     {
       id: 'authentication',
       title: t('protocolAdapter.uiSchema.groups.authentication'),
-      properties: ['auth'],
+      children: ['auth'],
+    },
+    {
+      id: 's7advanced',
+      title: t('protocolAdapter.uiSchema.groups.s7advanced'),
+      children: ['ping','pingTime', 'maxAmqCaller', 'maxAmqCallee', 'remoteTsap', 'remoteRack2', 'remoteSlot2', 'pduSize', 'retryTime', 'retryTimeout', 'retryTime', 'retryTime'],
     },
     {
       id: 'http',
       title: t('protocolAdapter.uiSchema.groups.http'),
-      properties: [
+      children: [
         'httpRequestMethod',
         'httpRequestBodyContentType',
         'httpRequestBody',
@@ -52,7 +51,7 @@ const useGetUiSchema = (isNewAdapter = true) => {
   ]
 
   const uiSchema: UiSchema = {
-    'ui:tabs': tabs,
+    'ui:groups': groups,
 
     'ui:submitButtonOptions': {
       norender: true,
