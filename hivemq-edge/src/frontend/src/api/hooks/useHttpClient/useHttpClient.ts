@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import axios, { AxiosError } from 'axios'
 import { useNavigate } from 'react-router-dom'
 
@@ -24,7 +23,7 @@ export class AxiosHttpRequestWithInterceptors extends BaseHttpRequest {
 export const useHttpClient = () => {
   const { credentials, logout } = useAuth()
   const navigate = useNavigate()
-  const [client] = useState<HiveMqClient>(createInstance)
+  // const [client] = useState<HiveMqClient>(createInstance)
 
   function createInstance() {
     // Make sure to clear the interceptors, since axiosInstance is global
@@ -66,5 +65,5 @@ export const useHttpClient = () => {
     )
   }
 
-  return client
+  return createInstance()
 }
