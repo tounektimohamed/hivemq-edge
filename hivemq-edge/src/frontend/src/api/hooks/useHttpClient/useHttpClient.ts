@@ -20,6 +20,19 @@ export class AxiosHttpRequestWithInterceptors extends BaseHttpRequest {
   }
 }
 
+const consoleLog = (token: string | undefined, logout = false) => {
+  console.groupCollapsed(
+    '%c[dev] Token %c %s %s',
+    'color:lightblue;font-weight:bold;',
+    'color:lightcoral;',
+    token?.slice(-6),
+    logout ? '(logout)' : ''
+  )
+  console.log('Token')
+  console.log(token)
+  console.groupEnd()
+}
+
 export const useHttpClient = () => {
   const { credentials, logout } = useAuth()
   const navigate = useNavigate()
@@ -44,12 +57,15 @@ export const useHttpClient = () => {
           // TODO[NVL] Deactivating the reissuing, see https://hivemq.kanbanize.com/ctrl_board/57/cards/15303/details/
           // login({ token: reissuedToken }, () => undefined)
         }
+        consoleLog(credentials?.token)
+
         return response
       },
       function (error: AxiosError) {
         // Any status codes that falls outside the range of 2xx cause this function to trigger
         // Do something with response error
         if (error.response?.status === 401) {
+          consoleLog(credentials?.token, true)
           logout(() => navigate('/login'))
         }
         return Promise.reject(error)
