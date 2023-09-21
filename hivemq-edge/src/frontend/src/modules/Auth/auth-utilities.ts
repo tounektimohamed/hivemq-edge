@@ -31,17 +31,19 @@ export const processToken = (
 
   login({ token: authToken }, () => {
     setLoading(false)
+    consoleLog(authToken, 'from localStorage')
   })
 }
 
-export const authUtilities = {
-  isAuthenticated: false,
-  login(callback: VoidFunction) {
-    authUtilities.isAuthenticated = true
-    setTimeout(callback, 1) // fake async
-  },
-  logout(callback: VoidFunction) {
-    authUtilities.isAuthenticated = false
-    setTimeout(callback, 1)
-  },
+export const consoleLog = (token: string | undefined, context: string) => {
+  console.groupCollapsed(
+    '%c[dev] Token %c %s %s',
+    'color:lightblue;font-weight:bold;',
+    'color:lightcoral;',
+    token?.slice(-6),
+    `(${context})`
+  )
+  console.log('Token')
+  console.log(token)
+  console.groupEnd()
 }

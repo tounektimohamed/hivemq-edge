@@ -2,7 +2,7 @@ import { createContext, FunctionComponent, PropsWithChildren, useEffect, useStat
 
 import { ApiBearerToken } from '@/api/__generated__'
 import { useLocalStorage } from '@/hooks/useLocalStorage/useLocalStorage.ts'
-import { authUtilities, processToken } from '@/modules/Auth/auth-utilities.ts'
+import { consoleLog, processToken } from '@/modules/Auth/auth-utilities.ts'
 
 interface AuthContextType {
   credentials: ApiBearerToken | null
@@ -16,9 +16,10 @@ export const AuthContext = createContext<AuthContextType | null>(null)
 
 export const AuthProvider: FunctionComponent<PropsWithChildren> = ({ children }) => {
   const [credentials, setCredentials] = useState<ApiBearerToken | null>(null)
+  const [isLoading, setLoading] = useState(true)
+  const [isAuthenticated, setAuthenticated] = useState(false)
 
   const [isAuthToken, setAuthToken] = useLocalStorage<string | undefined>('auth', undefined)
-  const [isLoading, setLoading] = useState(true)
 
   useEffect(() => {
     processToken(isAuthToken, setAuthToken, login, setLoading)
@@ -26,25 +27,26 @@ export const AuthProvider: FunctionComponent<PropsWithChildren> = ({ children })
   }, [])
 
   const login = (newUser: ApiBearerToken, callback: VoidFunction) => {
-    return authUtilities.login(() => {
-      setCredentials(newUser)
-      setAuthToken(newUser.token)
-      callback()
-    })
+    consoleLog(newUser.token, 'login')
+    setCredentials(newUser)
+    setAuthToken(newUser.token)
+    setAuthenticated(true)
+    setLoading(false)
+    callback()
   }
 
   const logout = (callback: VoidFunction) => {
-    return authUtilities.logout(() => {
-      setCredentials(null)
-      setAuthToken(undefined)
-      callback()
-    })
+    consoleLog(undefined, 'logout')
+
+    setCredentials(null)
+    setAuthToken(undefined)
+    setAuthenticated(false)
+    setLoading(false)
+    callback()
   }
 
   return (
-    <AuthContext.Provider
-      value={{ credentials, login, logout, isLoading, isAuthenticated: authUtilities.isAuthenticated }}
-    >
+    <AuthContext.Provider value={{ credentials, login, logout, isLoading, isAuthenticated }}>
       {children}
     </AuthContext.Provider>
   )

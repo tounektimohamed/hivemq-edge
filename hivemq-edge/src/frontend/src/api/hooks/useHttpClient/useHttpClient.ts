@@ -26,7 +26,7 @@ const consoleLog = (token: string | undefined, logout = false) => {
     'color:lightblue;font-weight:bold;',
     'color:lightcoral;',
     token?.slice(-6),
-    logout ? '(logout)' : ''
+    logout ? '(401)' : ''
   )
   console.log('Token')
   console.log(token)
