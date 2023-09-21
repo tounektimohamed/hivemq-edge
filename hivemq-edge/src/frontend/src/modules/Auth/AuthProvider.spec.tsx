@@ -1,6 +1,6 @@
 import { useContext } from 'react'
 import { describe, it, expect, vi } from 'vitest'
-import { render, waitFor } from '@testing-library/react'
+import { act, render, waitFor } from '@testing-library/react'
 
 import { MOCK_JWT } from '@/__test-utils__/mocks.ts'
 
@@ -47,14 +47,20 @@ describe('AuthProvider', () => {
 
     expect(getByTestId('isLoading').textContent).toEqual('false')
     expect(getByTestId('isAuthenticated').textContent).toEqual('false')
-    getByTestId('login').click()
+
+    act(() => {
+      getByTestId('login').click()
+    })
 
     await waitFor(() => {
       expect(loginCallback).toHaveBeenCalledOnce()
       expect(getByTestId('credentials').textContent).toEqual(MOCK_JWT)
     })
 
-    getByTestId('logout').click()
+    act(() => {
+      getByTestId('logout').click()
+    })
+
     await waitFor(() => {
       expect(logoutCallback).toHaveBeenCalledOnce()
       expect(getByTestId('credentials').textContent).toEqual('')
