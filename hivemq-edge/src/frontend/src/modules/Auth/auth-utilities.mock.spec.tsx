@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { processToken } from '@/modules/Auth/auth-utilities.ts'
+import { verifyStoredToken } from '@/modules/Auth/auth-utilities.ts'
 import { MOCK_JWT } from '@/__test-utils__/mocks.ts'
 
 vi.mock('@/api/utils.ts', async () => {
@@ -18,7 +18,7 @@ describe('processToken', () => {
   const mockLogin = vi.fn(() => mockSetLoading(false))
 
   it('should accept a valid token', async () => {
-    processToken(MOCK_JWT, mockSetAuthToken, mockLogin, mockSetLoading)
+    verifyStoredToken(MOCK_JWT, mockSetAuthToken, mockLogin, mockSetLoading)
     expect(mockSetAuthToken).not.toHaveBeenCalled()
     expect(mockLogin).toHaveBeenCalledWith({ token: MOCK_JWT }, expect.anything())
 

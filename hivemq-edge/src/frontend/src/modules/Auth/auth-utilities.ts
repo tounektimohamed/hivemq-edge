@@ -3,7 +3,9 @@ import { Dispatch, SetStateAction } from 'react'
 import { ApiBearerToken } from '@/api/__generated__'
 import { parseJWT, verifyJWT } from '@/api/utils.ts'
 
-export const processToken = (
+export const LOCALSTORAGE_AUTH_TOKEN = 'auth'
+
+export const verifyStoredToken = (
   authToken: string | undefined,
   setAuthToken: Dispatch<SetStateAction<string | undefined>>,
   login: (newUser: ApiBearerToken, callback: VoidFunction) => void,
@@ -29,9 +31,9 @@ export const processToken = (
     return
   }
 
+  consoleLog(authToken, 'from localStorage')
   login({ token: authToken }, () => {
     setLoading(false)
-    consoleLog(authToken, 'from localStorage')
   })
 }
 

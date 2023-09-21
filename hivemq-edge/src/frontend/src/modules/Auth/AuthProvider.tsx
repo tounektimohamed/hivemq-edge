@@ -2,7 +2,8 @@ import { createContext, FunctionComponent, PropsWithChildren, useEffect, useStat
 
 import { ApiBearerToken } from '@/api/__generated__'
 import { useLocalStorage } from '@/hooks/useLocalStorage/useLocalStorage.ts'
-import { consoleLog, processToken } from '@/modules/Auth/auth-utilities.ts'
+
+import { LOCALSTORAGE_AUTH_TOKEN, consoleLog, verifyStoredToken } from './auth-utilities.ts'
 
 interface AuthContextType {
   credentials: ApiBearerToken | null
@@ -19,17 +20,17 @@ export const AuthProvider: FunctionComponent<PropsWithChildren> = ({ children })
   const [isLoading, setLoading] = useState(true)
   const [isAuthenticated, setAuthenticated] = useState(false)
 
-  const [isAuthToken, setAuthToken] = useLocalStorage<string | undefined>('auth', undefined)
+  const [storedToken, setStoredToken] = useLocalStorage<string | undefined>(LOCALSTORAGE_AUTH_TOKEN, undefined)
 
   useEffect(() => {
-    processToken(isAuthToken, setAuthToken, login, setLoading)
+    verifyStoredToken(storedToken, setStoredToken, login, setLoading)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const login = (newUser: ApiBearerToken, callback: VoidFunction) => {
     consoleLog(newUser.token, 'login')
     setCredentials(newUser)
-    setAuthToken(newUser.token)
+    setStoredToken(newUser.token)
     setAuthenticated(true)
     setLoading(false)
     callback()
@@ -39,7 +40,7 @@ export const AuthProvider: FunctionComponent<PropsWithChildren> = ({ children })
     consoleLog(undefined, 'logout')
 
     setCredentials(null)
-    setAuthToken(undefined)
+    setStoredToken(undefined)
     setAuthenticated(false)
     setLoading(false)
     callback()
