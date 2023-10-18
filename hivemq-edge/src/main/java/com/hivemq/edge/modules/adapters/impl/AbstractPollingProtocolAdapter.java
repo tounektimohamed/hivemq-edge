@@ -61,6 +61,13 @@ public abstract class AbstractPollingProtocolAdapter <T extends AbstractPollingP
             publishFuture.thenAccept(publishReturnCode -> protocolAdapterMetricsHelper.incrementReadPublishSuccess())
                     .exceptionally(throwable -> {
                         protocolAdapterMetricsHelper.incrementReadPublishFailure();
+                        if (sample.getQos() == 0) {
+                            protocolAdapterMetricsHelper.incrementReadPublishQos0Success();
+                        } else if (sample.getQos() == 1) {
+                            protocolAdapterMetricsHelper.incrementReadPublishQos1Success();
+                        } else if (sample.getQos() == 2) {
+                            protocolAdapterMetricsHelper.incrementReadPublishQos2Success();
+                        }
                         log.warn("Error Publishing Adapter Payload", throwable); return null;
                     });
             return publishFuture;

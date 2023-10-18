@@ -22,13 +22,17 @@ public class ProtocolAdapterMetricsHelper {
     static final String PERIOD = ".";
 
     protected Counter publishSuccessCounter;
+    protected Counter publishQos0SuccessCounter;
+    protected Counter publishQos1SuccessCounter;
+    protected Counter publishQos2SuccessCounter;
     protected Counter publishFailedCounter;
     protected Counter connectionSuccessCounter;
     protected Counter connectionFailedCounter;
 
-    public ProtocolAdapterMetricsHelper(final @NotNull String protocolAdapterType,
-                                        final @NotNull String protocolAdapterId,
-                                        final @NotNull MetricRegistry metricRegistry) {
+    public ProtocolAdapterMetricsHelper(
+            final @NotNull String protocolAdapterType,
+            final @NotNull String protocolAdapterId,
+            final @NotNull MetricRegistry metricRegistry) {
         Preconditions.checkNotNull(protocolAdapterType);
         Preconditions.checkNotNull(protocolAdapterId);
         Preconditions.checkNotNull(metricRegistry);
@@ -38,24 +42,55 @@ public class ProtocolAdapterMetricsHelper {
         initRegistry();
     }
 
-    protected void initRegistry(){
-        publishSuccessCounter = metricRegistry.counter(createAdapterMetricsNamespace("read.publish", true) + SUCCESS_COUNT);
-        publishFailedCounter = metricRegistry.counter(createAdapterMetricsNamespace("read.publish", true) + FAILED_COUNT);
-        connectionSuccessCounter = metricRegistry.counter(createAdapterMetricsNamespace("connection", true) + SUCCESS_COUNT);
-        connectionFailedCounter = metricRegistry.counter(createAdapterMetricsNamespace("connection", true) + FAILED_COUNT);
+    protected void initRegistry() {
+        publishSuccessCounter =
+                metricRegistry.counter(createAdapterMetricsNamespace("read.publish", true) + SUCCESS_COUNT);
+        publishQos0SuccessCounter =
+                metricRegistry.counter(createAdapterMetricsNamespace("read.qos-0.publish", true) + SUCCESS_COUNT);
+        publishQos1SuccessCounter =
+                metricRegistry.counter(createAdapterMetricsNamespace("read.qos-1.publish", true) + SUCCESS_COUNT);
+        publishQos2SuccessCounter =
+                metricRegistry.counter(createAdapterMetricsNamespace("read.qos-2.publish", true) + SUCCESS_COUNT);
+        publishFailedCounter =
+                metricRegistry.counter(createAdapterMetricsNamespace("read.publish", true) + FAILED_COUNT);
+        connectionSuccessCounter =
+                metricRegistry.counter(createAdapterMetricsNamespace("connection", true) + SUCCESS_COUNT);
+        connectionFailedCounter =
+                metricRegistry.counter(createAdapterMetricsNamespace("connection", true) + FAILED_COUNT);
     }
 
     /**
      * Use to indicate a read from the adapter has been successfully PUBLISHed
      */
-    public void incrementReadPublishSuccess(){
+    public void incrementReadPublishSuccess() {
         publishSuccessCounter.inc();
+    }
+
+    /**
+     * Use to indicate a read from the adapter has been successfully PUBLISHed with QoS 0
+     */
+    public void incrementReadPublishQos0Success() {
+        publishQos0SuccessCounter.inc();
+    }
+
+    /**
+     * Use to indicate a read from the adapter has been successfully PUBLISHed with QoS 1
+     */
+    public void incrementReadPublishQos1Success() {
+        publishQos1SuccessCounter.inc();
+    }
+
+    /**
+     * Use to indicate a read from the adapter has been successfully PUBLISHed with QoS 2
+     */
+    public void incrementReadPublishQos2Success() {
+        publishQos2SuccessCounter.inc();
     }
 
     /**
      * Use to indicate a read from the adapter has failed
      */
-    public void incrementReadPublishFailure(){
+    public void incrementReadPublishFailure() {
         publishFailedCounter.inc();
     }
 
@@ -63,36 +98,38 @@ public class ProtocolAdapterMetricsHelper {
     /**
      * Use to indicate a connection attempt to the device has failed
      */
-    public void incrementConnectionFailure(){
+    public void incrementConnectionFailure() {
         connectionFailedCounter.inc();
     }
 
     /**
      * Use to indicate a connection attempt to the device has succeeded
      */
-    public void incrementConnectionSuccess(){
+    public void incrementConnectionSuccess() {
         connectionSuccessCounter.inc();
     }
 
     /**
      * Increment an arbitrary counter in the adapter instance namespace
+     *
      * @param metricName - the metric name to be incremented (inside) the adapter namespace
      */
-    public void increment(final @NotNull String metricName){
+    public void increment(final @NotNull String metricName) {
         Preconditions.checkNotNull(metricName);
         metricRegistry.counter(createAdapterMetricsNamespace(metricName, false)).inc();
     }
 
     /**
      * Create a deterministic prefix for use in the metrics registry.
-     *
+     * <p>
      * Example format of the namespace:
      * com.hivemq.edge.protocol-adapters.[test-type].[test-id].[suffix](.) with optional trailing period
-     * @param suffix - the suffix to append to the namespace
+     *
+     * @param suffix         - the suffix to append to the namespace
      * @param trailingPeriod - should the namespace by suffixed with a trailing period
      * @return a namespace string for use in the metrics registry
      */
-    protected String createAdapterMetricsNamespace(@NotNull final String suffix, final boolean trailingPeriod){
+    protected String createAdapterMetricsNamespace(@NotNull final String suffix, final boolean trailingPeriod) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(HiveMQMetrics.PROTOCOL_ADAPTER_PREFIX);
         stringBuilder.append(protocolAdapterType);
@@ -100,7 +137,7 @@ public class ProtocolAdapterMetricsHelper {
         stringBuilder.append(protocolAdapterId);
         stringBuilder.append(PERIOD);
         stringBuilder.append(suffix);
-        if(trailingPeriod){
+        if (trailingPeriod) {
             stringBuilder.append(PERIOD);
         }
         return stringBuilder.toString();
