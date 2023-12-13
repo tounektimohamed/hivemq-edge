@@ -1,0 +1,20 @@
+@import '../../node_modules/@fontsource/roboto/400.css';
+@import '../../node_modules/@fontsource/roboto/500.css';
+@import '../../node_modules/@fontsource/roboto/700.css';
+/* @import '../../node_modules/@fontsource/raleway/400.css'; */
+@import '../../node_modules/@fontsource/raleway/500.css';
+@import '../../node_modules/@fontsource/raleway/700.css';
+
+@import "../../node_modules/@hivemq/ui-component-library/dist/styles.css";
+@import "../../node_modules/@hivemq/ui-component-library/dist/fonts/intelone-mono/intelone-mono.css"
+
+/* 
+@layer base {
+  p a {
+    @apply text-typo-link underline underline-offset-2 hover:text-yellow-700 dark:hover:text-yellow-300 hover:underline;
+  }
+  .card {
+    @apply bg-white dark:bg-stone-950;
+  }
+} 
+*/

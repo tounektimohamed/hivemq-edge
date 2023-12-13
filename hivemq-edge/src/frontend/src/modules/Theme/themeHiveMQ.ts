@@ -1,8 +1,6 @@
 // Theming with Chakra UI is based on the Styled System Theme Specification
 // Extend the theme to include custom colors, fonts, etc
 import { defineStyleConfig, extendTheme, theme as baseTheme } from '@chakra-ui/react'
-import '@fontsource/roboto/400.css'
-import '@fontsource/roboto/700.css'
 
 import { statTheme } from './styles/Stat'
 import { drawerTheme } from './styles/Drawer.ts'
