@@ -15,12 +15,10 @@
  */
 package com.hivemq.edge.adapters.plc4x.types.bacnet;
 
-import com.hivemq.api.model.adapters.ProtocolAdapter;
 import com.hivemq.edge.modules.adapters.ProtocolAdapterConstants;
 import com.hivemq.edge.modules.adapters.impl.AbstractProtocolAdapterInformation;
 import com.hivemq.edge.modules.api.adapters.ProtocolAdapterCapability;
 import com.hivemq.edge.modules.api.adapters.ProtocolAdapterInformation;
-import com.hivemq.edge.modules.config.CustomConfig;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import java.util.List;
@@ -28,32 +26,32 @@ import java.util.List;
 /**
  * @author HiveMQ Adapter Generator
  */
-public class BacnetAdapterInformation
+public class BacnetIpAdapterInformation
     extends AbstractProtocolAdapterInformation {
 
-    public static final ProtocolAdapterInformation INSTANCE = new BacnetAdapterInformation();
+    public static final ProtocolAdapterInformation INSTANCE = new BacnetIpAdapterInformation();
 
-    protected BacnetAdapterInformation() {
+    protected BacnetIpAdapterInformation() {
     }
 
     @Override
     public @NotNull String getProtocolName() {
-        return "BACnet";
+        return "BACnet/IP";
     }
 
     @Override
     public @NotNull String getProtocolId() {
-        return "bacnet";
+        return "bacnetip";
     }
 
     @Override
     public @NotNull String getDisplayName() {
-        return "BACnet to MQTT Protocol Adapter";
+        return "BACnet/IP to MQTT Protocol Adapter";
     }
 
     @Override
     public @NotNull String getDescription() {
-        return "Connects HiveMQ Edge to existing BACnet compliant devices, bringing data from the PLC into MQTT.";
+        return "Connects HiveMQ Edge to existing BACnet/IP compliant devices, bringing data from the PLC into MQTT.";
     }
 
     @Override

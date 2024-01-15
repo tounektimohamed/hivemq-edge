@@ -21,10 +21,10 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import java.util.Map;
 
-public class BacnetConfigConverter {
+public class BacnetIpConfigConverter {
 
-    public static @NotNull BacnetAdapterConfig convertConfig(final ObjectMapper objectMapper, final @NotNull Map<String, Object> config) {
-        return objectMapper.convertValue(config, BacnetAdapterConfig.class);
+    public static @NotNull BacnetIpAdapterConfig convertConfig(final ObjectMapper objectMapper, final @NotNull Map<String, Object> config) {
+        return objectMapper.convertValue(config, BacnetIpAdapterConfig.class);
     }
 
     public static @NotNull Map<String, Object> unconvertConfig(final ObjectMapper objectMapper, final @NotNull CustomConfig config) {

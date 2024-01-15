@@ -22,18 +22,18 @@ import com.hivemq.edge.modules.api.adapters.ProtocolAdapterInformation;
 /**
  * @author HiveMQ Adapter Generator
  */
-public class BacnetProtocolAdapter extends AbstractPlc4xAdapter<BacnetAdapterConfig> {
+public class BacnetIpProtocolAdapter extends AbstractPlc4xAdapter<BacnetIpAdapterConfig> {
 
-    public BacnetProtocolAdapter(
+    public BacnetIpProtocolAdapter(
             final ProtocolAdapterInformation adapterInformation,
-            final BacnetAdapterConfig adapterConfig,
+            final BacnetIpAdapterConfig adapterConfig,
             final MetricRegistry metricRegistry) {
         super(adapterInformation, adapterConfig, metricRegistry);
     }
 
     @Override
     protected String getProtocolHandler() {
-        return "bacnet";
+        return "bacnet-ip";
     }
 
     @Override

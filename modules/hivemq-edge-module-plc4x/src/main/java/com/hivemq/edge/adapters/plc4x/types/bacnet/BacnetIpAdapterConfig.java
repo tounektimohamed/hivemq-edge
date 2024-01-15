@@ -17,7 +17,7 @@ package com.hivemq.edge.adapters.plc4x.types.bacnet;
 
 import com.hivemq.edge.adapters.plc4x.model.Plc4xAdapterConfig;
 
-public class BacnetAdapterConfig extends Plc4xAdapterConfig {
+public class BacnetIpAdapterConfig extends Plc4xAdapterConfig {
 
 
 }

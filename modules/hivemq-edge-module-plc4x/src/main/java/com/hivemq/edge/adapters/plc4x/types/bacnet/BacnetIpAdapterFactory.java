@@ -28,31 +28,31 @@ import java.util.Map;
 /**
  * @author HiveMQ Adapter Generator
  */
-public class BacnetAdapterFactory implements ProtocolAdapterFactory<BacnetAdapterConfig> {
+public class BacnetIpAdapterFactory implements ProtocolAdapterFactory<BacnetIpAdapterConfig> {
 
     @Override
     public @NotNull ProtocolAdapterInformation getInformation() {
-        return BacnetAdapterInformation.INSTANCE;
+        return BacnetIpAdapterInformation.INSTANCE;
     }
 
     @Override
-    public @NotNull ProtocolAdapter createAdapter(@NotNull final ProtocolAdapterInformation adapterInformation, @NotNull final ProtocolAdapterInput<BacnetAdapterConfig> input) {
-        return new BacnetProtocolAdapter(adapterInformation, input.getConfig(), input.getMetricRegistry());
+    public @NotNull ProtocolAdapter createAdapter(@NotNull final ProtocolAdapterInformation adapterInformation, @NotNull final ProtocolAdapterInput<BacnetIpAdapterConfig> input) {
+        return new BacnetIpProtocolAdapter(adapterInformation, input.getConfig(), input.getMetricRegistry());
     }
 
     @Override
-    public @NotNull BacnetAdapterConfig convertConfigObject(final @NotNull ObjectMapper objectMapper, final @NotNull Map<@NotNull String, Object> config) {
-        return BacnetConfigConverter.convertConfig(objectMapper, config);
+    public @NotNull BacnetIpAdapterConfig convertConfigObject(final @NotNull ObjectMapper objectMapper, final @NotNull Map<@NotNull String, Object> config) {
+        return BacnetIpConfigConverter.convertConfig(objectMapper, config);
     }
 
     @Override
     public Map<String, Object> unconvertConfigObject(final @NotNull ObjectMapper objectMapper, final CustomConfig config) {
-        return BacnetConfigConverter.unconvertConfig(objectMapper, config);
+        return BacnetIpConfigConverter.unconvertConfig(objectMapper, config);
     }
 
     @Override
-    public @NotNull Class<BacnetAdapterConfig> getConfigClass() {
-        return BacnetAdapterConfig.class;
+    public @NotNull Class<BacnetIpAdapterConfig> getConfigClass() {
+        return BacnetIpAdapterConfig.class;
     }
 
 }
