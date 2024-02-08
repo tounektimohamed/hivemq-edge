@@ -149,6 +149,7 @@ public class MessageForwarderImpl implements MessageForwarder {
             //QoS 0 has no inflight marker
             if (qos != QoS.AT_MOST_ONCE) {
                 //-- 15665 - > QoS 0 causes republishing
+                log.error("[RESTART]: Removing message from queue");
                 FutureUtils.addExceptionLogger(queuePersistence.get().removeShared(queueId, uniqueId));
             }
             continueForwarding(queueId, forwarders.get(forwarderId));
@@ -277,6 +278,7 @@ public class MessageForwarderImpl implements MessageForwarder {
         final ListenableFuture<ImmutableList<PUBLISH>> pollFuture = queuePersistence.get()
                 .readShared(queueId, FORWARDER_POLL_THRESHOLD_MESSAGES, PUBLISH_POLL_BATCH_SIZE_BYTES);
         return Futures.transformAsync(pollFuture, publishes -> {
+            log.error("[RESTART]:Polled publishes: {}", publishes);
             if (publishes == null) {
                 notEmptyQueues.remove(queueId);
                 return Futures.immediateFuture(false);
