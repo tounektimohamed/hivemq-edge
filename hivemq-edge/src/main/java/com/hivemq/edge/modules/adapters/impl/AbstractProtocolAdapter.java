@@ -48,7 +48,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
@@ -352,10 +351,10 @@ public abstract class AbstractProtocolAdapter<T extends AbstractProtocolAdapterC
     protected void onStartSuccess(@NotNull final ProtocolAdapterStartOutput output){
         setRuntimeStatus(RuntimeStatus.STARTED);
         output.startedSuccessfully("adapter start OK");
-        eventService.fireEvent(
-                eventBuilder(Event.SEVERITY.INFO).
-                        withMessage(String.format("Adapter '%s' started OK.",
-                        adapterConfig.getId())).build());
+
+        final Event event = eventBuilder(Event.SEVERITY.INFO).withMessage(String.format("Adapter '%s' started OK.",
+                adapterConfig.getId())).build();
+        eventService.fireEvent(event);
     }
 
     protected void onStop(){

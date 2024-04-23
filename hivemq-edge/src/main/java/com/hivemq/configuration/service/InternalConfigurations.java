@@ -218,7 +218,7 @@ public class InternalConfigurations {
 
     public static final @NotNull AtomicInteger INTERVAL_BETWEEN_CLEANUP_JOBS_SEC = new AtomicInteger(4);
 
-    public static final @NotNull AtomicBoolean MQTT_ALLOW_DOLLAR_TOPICS = new AtomicBoolean(false);
+    public static final @NotNull AtomicBoolean MQTT_ALLOW_DOLLAR_TOPICS = new AtomicBoolean(true);
 
     public static final @NotNull AtomicInteger MQTT_EVENT_EXECUTOR_THREAD_COUNT = new AtomicInteger(AVAILABLE_PROCESSORS_TIMES_TWO);
 

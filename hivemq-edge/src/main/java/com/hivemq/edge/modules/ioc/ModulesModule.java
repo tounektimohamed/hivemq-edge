@@ -15,6 +15,7 @@
  */
 package com.hivemq.edge.modules.ioc;
 
+import com.hivemq.configuration.HivemqId;
 import com.hivemq.edge.impl.events.EventServiceDelegateImpl;
 import com.hivemq.edge.impl.events.InMemoryEventImpl;
 import com.hivemq.edge.modules.adapters.impl.ModuleServicesImpl;
@@ -27,13 +28,22 @@ import com.hivemq.edge.modules.api.events.EventListener;
 import com.hivemq.edge.modules.api.events.EventService;
 import com.hivemq.edge.modules.api.events.EventStore;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.mqtt.message.QoS;
+import com.hivemq.mqtt.message.publish.PUBLISH;
+import com.hivemq.mqtt.message.publish.PUBLISHFactory;
+import com.hivemq.mqtt.services.InternalPublishService;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
 
 import javax.inject.Singleton;
+import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Executors;
+
+import static com.hivemq.edge.model.TypeIdentifier.TYPE.ADAPTER;
 
 @Module
 public abstract class ModulesModule {
@@ -61,8 +71,32 @@ public abstract class ModulesModule {
     @Provides
     @ElementsIntoSet
     @Singleton
-    static Set<EventListener> provideEventListeners() {
+    static Set<EventListener> provideEventListeners(
+            final @NotNull InternalPublishService internalPublishService,
+            final @NotNull HivemqId hiveMQId) {
+
+
+        Set<EventListener> listeners = new HashSet<>();
+        listeners.add(event -> {
+            System.err.println("Event Listener got called");
+            if (event.getSource().getType() != ADAPTER) {
+                return;
+            }
+
+            final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withTopic("$sys/adapter")
+                    .withPayload(event.getMessage().getBytes(StandardCharsets.UTF_8))
+                    .withHivemqId(hiveMQId.get())
+                    .withQoS(QoS.AT_LEAST_ONCE)
+                    .withOnwardQos(QoS.AT_LEAST_ONCE)
+                    .withRetain(true)
+                    .withMessageExpiryInterval(PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET)
+                    .build();
+
+            internalPublishService.publish(publish, Executors.newScheduledThreadPool(1), "internal-system");
+        });
+
+
         //TODO register event listeners here
-        return Set.of();
+        return listeners;
     }
 }
