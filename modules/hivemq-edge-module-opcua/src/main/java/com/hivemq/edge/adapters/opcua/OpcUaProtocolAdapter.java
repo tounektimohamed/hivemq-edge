@@ -15,7 +15,6 @@
  */
 package com.hivemq.edge.adapters.opcua;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.hivemq.adapter.sdk.api.ProtocolAdapter;
@@ -83,7 +82,6 @@ public class OpcUaProtocolAdapter implements ProtocolAdapter {
     private final @NotNull ProtocolAdapterMetricsService protocolAdapterMetricsService;
     private @Nullable OpcUaClient opcUaClient;
     private final @NotNull Map<UInteger, OpcUaAdapterConfig.Subscription> subscriptionMap = new ConcurrentHashMap<>();
-    private final @NotNull ObjectMapper objectMapper = new ObjectMapper();
 
     public OpcUaProtocolAdapter(
             final @NotNull ProtocolAdapterInformation adapterInformation,
@@ -148,9 +146,8 @@ public class OpcUaProtocolAdapter implements ProtocolAdapter {
             } else {
                 subscriptionMap.clear();
                 try {
-                    return opcUaClient.disconnect().thenAccept(client -> {
-                        protocolAdapterState.setConnectionStatus(DISCONNECTED);
-                    });
+                    return opcUaClient.disconnect()
+                            .thenAccept(client -> protocolAdapterState.setConnectionStatus(DISCONNECTED));
                 } finally {
                     opcUaClient = null;
                 }
@@ -190,7 +187,7 @@ public class OpcUaProtocolAdapter implements ProtocolAdapter {
                             requireNonNullElse(displayName, ""),
                             parent != null ? parent.getNodeId().toParseableString() : null,
                             nodeType != null ? nodeType : NodeType.VALUE,
-                            nodeType == NodeType.VALUE);
+                            nodeType == NodeType.VALUE || nodeType == NodeType.OBJECT);
         }, input.getDepth());
     }
 
@@ -260,14 +257,12 @@ public class OpcUaProtocolAdapter implements ProtocolAdapter {
                 protocolAdapterState.setConnectionStatus(CONNECTED);
             }
         });
-        opcUaClient.addFaultListener(serviceFault -> {
-            moduleServices.eventService()
-                    .createAdapterEvent(adapterConfig.getId(), adapterInformation.getProtocolId())
-                    .withSeverity(Event.SEVERITY.ERROR)
-                    .withPayload(serviceFault.getResponseHeader().getServiceResult())
-                    .withMessage("A Service Fault was Detected.")
-                    .fire();
-        });
+        opcUaClient.addFaultListener(serviceFault -> moduleServices.eventService()
+                .createAdapterEvent(adapterConfig.getId(), adapterInformation.getProtocolId())
+                .withSeverity(Event.SEVERITY.ERROR)
+                .withPayload(serviceFault.getResponseHeader().getServiceResult())
+                .withMessage("A Service Fault was Detected.")
+                .fire());
     }
 
     private @NotNull CompletableFuture<Void> subscribeToNode(final @NotNull OpcUaAdapterConfig.Subscription subscription) {
