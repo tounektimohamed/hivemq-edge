@@ -62,6 +62,7 @@ public class EIPProtocolAdapter extends AbstractPlc4xAdapter<EIPAdapterConfig, P
         map.put(BACKPLANE, nullSafe(config.getBackplane()));
         map.put(SLOT, nullSafe(config.getSlot()));
         map.put("bigEndian", "false");
+        map.put("big-endian", "false");
         return map;
     }
 
