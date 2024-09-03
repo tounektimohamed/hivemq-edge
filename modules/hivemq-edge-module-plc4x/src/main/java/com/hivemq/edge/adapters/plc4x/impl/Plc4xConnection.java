@@ -127,7 +127,7 @@ public abstract class Plc4xConnection<T extends Plc4xAdapterConfig> {
 
     public @NotNull CompletableFuture<? extends PlcReadResponse> read(final @NotNull Plc4xAdapterConfig.PollingContextImpl subscription) {
         lazyConnectionCheck();
-        if (!plcConnection.getMetadata().canRead()) {
+        if (!plcConnection.getMetadata().isReadSupported()) {
             return CompletableFuture.failedFuture(new Plc4xException("connection type read-blocking"));
         }
         if (log.isTraceEnabled()) {
@@ -147,7 +147,7 @@ public abstract class Plc4xConnection<T extends Plc4xAdapterConfig> {
             final @NotNull Plc4xAdapterConfig.PollingContextImpl subscription,
             final @NotNull Consumer<PlcSubscriptionEvent> consumer) {
         lazyConnectionCheck();
-        if (!plcConnection.getMetadata().canSubscribe()) {
+        if (!plcConnection.getMetadata().isSubscribeSupported()) {
             return CompletableFuture.failedFuture(new Plc4xException("connection type cannot subscribe"));
         }
         if (log.isTraceEnabled()) {
