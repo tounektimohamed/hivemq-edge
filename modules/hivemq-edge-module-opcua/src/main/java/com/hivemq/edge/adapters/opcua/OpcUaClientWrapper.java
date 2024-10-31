@@ -8,9 +8,6 @@ import com.hivemq.adapter.sdk.api.discovery.ProtocolAdapterDiscoveryInput;
 import com.hivemq.adapter.sdk.api.discovery.ProtocolAdapterDiscoveryOutput;
 import com.hivemq.adapter.sdk.api.events.EventService;
 import com.hivemq.adapter.sdk.api.events.model.Event;
-import com.hivemq.adapter.sdk.api.exceptions.TagDefinitionParseException;
-import com.hivemq.adapter.sdk.api.exceptions.TagNotFoundException;
-import com.hivemq.adapter.sdk.api.services.ModuleServices;
 import com.hivemq.adapter.sdk.api.services.ProtocolAdapterMetricsService;
 import com.hivemq.adapter.sdk.api.services.ProtocolAdapterPublishService;
 import com.hivemq.adapter.sdk.api.state.ProtocolAdapterState;
@@ -48,7 +45,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -85,7 +81,7 @@ public class OpcUaClientWrapper {
 
     public @NotNull CompletableFuture<@NotNull JsonNode> createMqttPayloadJsonSchema(final @NotNull OpcuaTag tag) {
 
-        final String nodeId = tag.getTagDefinition().getNode();
+        final String nodeId = tag.getDefinition().getNode();
         return jsonSchemaGenerator.map(gen -> gen.createJsonSchema(NodeId.parse(nodeId)))
                 .orElseGet(() -> CompletableFuture.failedFuture(new NullPointerException()));
     }
@@ -131,7 +127,7 @@ public class OpcUaClientWrapper {
         final MqttToOpcUaMapping writeContext = (MqttToOpcUaMapping) writingInput.getWritingContext();
         log.debug("Write for opcua is invoked with payload '{}' and context '{}' ", opcUAWritePayload, writeContext);
 
-        final NodeId nodeId = NodeId.parse(opcuaTag.getTagDefinition().getNode());
+        final NodeId nodeId = NodeId.parse(opcuaTag.getDefinition().getNode());
 
         jsonToOpcUAConverter.map(conv -> conv.convertToOpcUAValue(opcUAWritePayload.getValue(), nodeId))
                 .ifPresentOrElse(opcUaObject -> {

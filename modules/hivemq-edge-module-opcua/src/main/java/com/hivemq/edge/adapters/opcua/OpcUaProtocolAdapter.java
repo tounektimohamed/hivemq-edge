@@ -156,7 +156,7 @@ public class OpcUaProtocolAdapter implements ProtocolAdapter, WritingProtocolAda
         final MqttToOpcUaMapping writeContext = (MqttToOpcUaMapping) input.getWritingContext();
         if(opcUaClientWrapperTemp != null) {
         adapterConfig.getTags().stream()
-                .filter(tag -> tag.getTagName().equals(writeContext.getTagName()))
+                .filter(tag -> tag.getName().equals(writeContext.getTagName()))
                 .findFirst()
                 .ifPresentOrElse(
                         def -> opcUaClientWrapperTemp.write(input, output, def),
@@ -182,7 +182,7 @@ public class OpcUaProtocolAdapter implements ProtocolAdapter, WritingProtocolAda
         final OpcUaClientWrapper opcUaClientWrapperTemp = opcUaClientWrapper;
         if(opcUaClientWrapperTemp != null) {
             return adapterConfig.getTags().stream()
-                    .filter(tag -> tag.getTagName().equals(writeContext.getTagName()))
+                    .filter(tag -> tag.getName().equals(writeContext.getTagName()))
                     .findFirst()
                     .map(def -> opcUaClientWrapperTemp.createMqttPayloadJsonSchema((OpcuaTag)def))
                     .orElse(CompletableFuture.failedFuture(new IllegalStateException("Generating schema failed because the used tag '" +
