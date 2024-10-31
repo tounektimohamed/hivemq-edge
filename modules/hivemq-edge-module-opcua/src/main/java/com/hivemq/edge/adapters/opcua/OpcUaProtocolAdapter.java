@@ -36,6 +36,7 @@ import com.hivemq.adapter.sdk.api.writing.WritingProtocolAdapter;
 import com.hivemq.edge.adapters.opcua.config.BidirectionalOpcUaAdapterConfig;
 import com.hivemq.edge.adapters.opcua.config.OpcUaAdapterConfig;
 import com.hivemq.edge.adapters.opcua.config.mqtt2opcua.MqttToOpcUaMapping;
+import com.hivemq.edge.adapters.opcua.config.tag.OpcuaTag;
 import com.hivemq.edge.adapters.opcua.mqtt2opcua.OpcUaPayload;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -83,7 +84,8 @@ public class OpcUaProtocolAdapter implements ProtocolAdapter, WritingProtocolAda
                     try {
                         OpcUaClientWrapper.createAndConnect(adapterConfig,
                                 protocolAdapterState,
-                                moduleServices,
+                                moduleServices.eventService(),
+                                moduleServices.adapterPublishService(),
                                 adapterConfig.getId(),
                                 adapterInformation.getProtocolId(),
                                 protocolAdapterMetricsService).thenApply(wrapper -> {
@@ -151,8 +153,17 @@ public class OpcUaProtocolAdapter implements ProtocolAdapter, WritingProtocolAda
     @Override
     public void write(final @NotNull WritingInput input, final @NotNull WritingOutput output) {
         final OpcUaClientWrapper opcUaClientWrapperTemp = opcUaClientWrapper;
+        final MqttToOpcUaMapping writeContext = (MqttToOpcUaMapping) input.getWritingContext();
         if(opcUaClientWrapperTemp != null) {
-            opcUaClientWrapperTemp.write(input, output);
+        adapterConfig.getTags().stream()
+                .filter(tag -> tag.getTagName().equals(writeContext.getTagName()))
+                .findFirst()
+                .ifPresentOrElse(
+                        def -> opcUaClientWrapperTemp.write(input, output, def),
+                        () -> output.fail("Polling for protocol adapter failed because the used tag '" +
+                                writeContext.getTagName() +
+                                "' was not found. For the polling to work the tag must be created via REST API or the UI.")
+                );
         } else {
             log.warn("Tried executing write while client wasn't started");
         }
@@ -170,7 +181,13 @@ public class OpcUaProtocolAdapter implements ProtocolAdapter, WritingProtocolAda
     public @NotNull CompletableFuture<@NotNull JsonNode> createMqttPayloadJsonSchema(final @NotNull MqttToOpcUaMapping writeContext) {
         final OpcUaClientWrapper opcUaClientWrapperTemp = opcUaClientWrapper;
         if(opcUaClientWrapperTemp != null) {
-            return opcUaClientWrapperTemp.createMqttPayloadJsonSchema(writeContext);
+            return adapterConfig.getTags().stream()
+                    .filter(tag -> tag.getTagName().equals(writeContext.getTagName()))
+                    .findFirst()
+                    .map(def -> opcUaClientWrapperTemp.createMqttPayloadJsonSchema((OpcuaTag)def))
+                    .orElse(CompletableFuture.failedFuture(new IllegalStateException("Generating schema failed because the used tag '" +
+                            writeContext.getTagName() +
+                            "' was not found. The tag must be created via REST API or the UI.")));
         } else {
             log.warn("Tried executing createMqttPayloadJsonSchema while client wasn't started");
             return CompletableFuture.failedFuture(new IllegalStateException("Tried executing createMqttPayloadJsonSchema while client wasn't started"));

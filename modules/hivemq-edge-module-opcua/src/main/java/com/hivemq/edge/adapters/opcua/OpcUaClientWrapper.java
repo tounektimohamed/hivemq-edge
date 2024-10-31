@@ -6,11 +6,13 @@ import com.google.common.collect.ImmutableList;
 import com.hivemq.adapter.sdk.api.discovery.NodeType;
 import com.hivemq.adapter.sdk.api.discovery.ProtocolAdapterDiscoveryInput;
 import com.hivemq.adapter.sdk.api.discovery.ProtocolAdapterDiscoveryOutput;
+import com.hivemq.adapter.sdk.api.events.EventService;
 import com.hivemq.adapter.sdk.api.events.model.Event;
 import com.hivemq.adapter.sdk.api.exceptions.TagDefinitionParseException;
 import com.hivemq.adapter.sdk.api.exceptions.TagNotFoundException;
 import com.hivemq.adapter.sdk.api.services.ModuleServices;
 import com.hivemq.adapter.sdk.api.services.ProtocolAdapterMetricsService;
+import com.hivemq.adapter.sdk.api.services.ProtocolAdapterPublishService;
 import com.hivemq.adapter.sdk.api.state.ProtocolAdapterState;
 import com.hivemq.adapter.sdk.api.tag.Tag;
 import com.hivemq.adapter.sdk.api.writing.WritingInput;
@@ -19,6 +21,7 @@ import com.hivemq.edge.adapters.opcua.client.OpcUaClientConfigurator;
 import com.hivemq.edge.adapters.opcua.client.OpcUaEndpointFilter;
 import com.hivemq.edge.adapters.opcua.config.OpcUaAdapterConfig;
 import com.hivemq.edge.adapters.opcua.config.mqtt2opcua.MqttToOpcUaMapping;
+import com.hivemq.edge.adapters.opcua.config.tag.OpcuaTag;
 import com.hivemq.edge.adapters.opcua.config.tag.OpcuaTagDefinition;
 import com.hivemq.edge.adapters.opcua.mqtt2opcua.JsonSchemaGenerator;
 import com.hivemq.edge.adapters.opcua.mqtt2opcua.JsonToOpcUAConverter;
@@ -45,6 +48,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -62,19 +66,16 @@ public class OpcUaClientWrapper {
     public final @NotNull Optional<JsonToOpcUAConverter> jsonToOpcUAConverter;
     public final @NotNull Optional<JsonSchemaGenerator> jsonSchemaGenerator;
     public final @NotNull OpcUaSubscriptionLifecycle opcUaSubscriptionLifecycle;
-    private final @NotNull ModuleServices moduleServices;
 
     public OpcUaClientWrapper(
             @NotNull final OpcUaClient client,
             @NotNull final OpcUaSubscriptionLifecycle opcUaSubscriptionLifecycle,
             @NotNull final Optional<JsonToOpcUAConverter> jsonToOpcUAConverter,
-            @NotNull final Optional<JsonSchemaGenerator> jsonSchemaGenerator,
-            @NotNull final ModuleServices moduleServices) {
+            @NotNull final Optional<JsonSchemaGenerator> jsonSchemaGenerator) {
         this.client = client;
         this.jsonToOpcUAConverter = jsonToOpcUAConverter;
         this.jsonSchemaGenerator = jsonSchemaGenerator;
         this.opcUaSubscriptionLifecycle = opcUaSubscriptionLifecycle;
-        this.moduleServices = moduleServices;
     }
 
     public CompletableFuture<Void> stop() {
@@ -82,24 +83,9 @@ public class OpcUaClientWrapper {
                 .thenCompose(ignored -> client.disconnect().thenApply(ignored2 -> null));
     }
 
-    public @NotNull CompletableFuture<@NotNull JsonNode> createMqttPayloadJsonSchema(final @NotNull MqttToOpcUaMapping writeContext) {
-        final @NotNull String tagName = writeContext.getTagName();
-        // first resolve the tag
-        final Tag<OpcuaTagDefinition> opcuaTag;
-        try {
-            opcuaTag = moduleServices.protocolAdapterTagService()
-                    .resolveTag(tagName, OpcuaTagDefinition.class);
-        } catch (final TagNotFoundException e) {
-            return CompletableFuture.failedFuture(new IllegalArgumentException("Schema discovery for protocol adapter failed because the used tag '" +
-                    tagName +
-                    "' was not found. For the polling to work the tag must be created via REST API or the UI."));
-        } catch (final TagDefinitionParseException e) {
-            return CompletableFuture.failedFuture(new IllegalArgumentException("Schema discovery for protocol adapter failed because the definition for the used tag '" +
-                    tagName +
-                    "' could not be parsed. This could be caused by the tag being edited in an incompatible way or the tag definition being designed for another protocol."));
-        }
+    public @NotNull CompletableFuture<@NotNull JsonNode> createMqttPayloadJsonSchema(final @NotNull OpcuaTag tag) {
 
-        final String nodeId = opcuaTag.getTagDefinition().getNode();
+        final String nodeId = tag.getTagDefinition().getNode();
         return jsonSchemaGenerator.map(gen -> gen.createJsonSchema(NodeId.parse(nodeId)))
                 .orElseGet(() -> CompletableFuture.failedFuture(new NullPointerException()));
     }
@@ -140,27 +126,10 @@ public class OpcUaClientWrapper {
         });
     }
 
-    public void write(final @NotNull WritingInput writingInput, final @NotNull WritingOutput writingOutput) {
+    public void write(final @NotNull WritingInput writingInput, final @NotNull WritingOutput writingOutput, Tag<OpcuaTagDefinition> opcuaTag) {
         final OpcUaPayload opcUAWritePayload = (OpcUaPayload) writingInput.getWritingPayload();
         final MqttToOpcUaMapping writeContext = (MqttToOpcUaMapping) writingInput.getWritingContext();
         log.debug("Write for opcua is invoked with payload '{}' and context '{}' ", opcUAWritePayload, writeContext);
-        final @NotNull String tagName = writeContext.getTagName();
-        // first resolve the tag
-        final Tag<OpcuaTagDefinition> opcuaTag;
-        try {
-            opcuaTag = writingInput.protocolAdapterTagService()
-                    .resolveTag(writeContext.getTagName(), OpcuaTagDefinition.class);
-        } catch (final TagNotFoundException e) {
-            writingOutput.fail("Writing for protocol adapter failed because the used tag '" +
-                    tagName +
-                    "' was not found. For the polling to work the tag must be created via REST API or the UI.");
-            return;
-        } catch (final TagDefinitionParseException e) {
-            writingOutput.fail("Writing for protocol adapter failed because the definition for the used tag '" +
-                    tagName +
-                    "' could not be parsed. This could be caused by the tag being edited in an incompatible way or the tag definition being designed for another protocol.");
-            return;
-        }
 
         final NodeId nodeId = NodeId.parse(opcuaTag.getTagDefinition().getNode());
 
@@ -258,7 +227,8 @@ public class OpcUaClientWrapper {
     public static CompletableFuture<OpcUaClientWrapper> createAndConnect(
             final @NotNull OpcUaAdapterConfig adapterConfig,
             final @NotNull ProtocolAdapterState protocolAdapterState,
-            final @NotNull ModuleServices moduleServices,
+            final @NotNull EventService eventService,
+            final @NotNull ProtocolAdapterPublishService adapterPublishService,
             final @NotNull String id,
             final @NotNull String protocolId,
             final @NotNull ProtocolAdapterMetricsService protocolAdapterMetricsService) throws UaException {
@@ -286,7 +256,7 @@ public class OpcUaClientWrapper {
         });
         opcUaClient.addFaultListener(serviceFault -> {
             log.info("OPC UA client of protocol adapter '{}' detected a service fault: {}", id, serviceFault);
-            moduleServices.eventService()
+            eventService
                     .createAdapterEvent(adapterConfig.getId(), protocolId)
                     .withSeverity(Event.SEVERITY.ERROR)
                     .withPayload(serviceFault.getResponseHeader().getServiceResult())
@@ -299,7 +269,9 @@ public class OpcUaClientWrapper {
                     adapterConfig.getId(),
                     protocolId,
                     protocolAdapterMetricsService,
-                    moduleServices.eventService(), moduleServices.adapterPublishService(), moduleServices);
+                    eventService,
+                    adapterPublishService,
+                    adapterConfig.getTags());
 
             opcUaClient.getSubscriptionManager().addSubscriptionListener(opcUaSubscriptionLifecycle);
 
@@ -313,8 +285,7 @@ public class OpcUaClientWrapper {
                         .thenApply(ignored -> new OpcUaClientWrapper(opcUaClient,
                                 opcUaSubscriptionLifecycle,
                                 jsonToOpcUAConverterOpt,
-                                jsonSchemaGeneratorOpt,
-                                moduleServices));
+                                jsonSchemaGeneratorOpt));
             } catch (final UaException e) {
                 log.error("Unable to create the converters for writing.", e);
                 final Optional<JsonToOpcUAConverter> jsonToOpcUAConverterOpt = Optional.empty();
@@ -324,8 +295,7 @@ public class OpcUaClientWrapper {
                         .thenApply(ignored -> new OpcUaClientWrapper(opcUaClient,
                                 opcUaSubscriptionLifecycle,
                                 jsonToOpcUAConverterOpt,
-                                jsonSchemaGeneratorOpt,
-                                moduleServices));
+                                jsonSchemaGeneratorOpt));
             }
         });
     }
