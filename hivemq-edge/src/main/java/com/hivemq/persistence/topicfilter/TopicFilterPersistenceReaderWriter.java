@@ -63,7 +63,7 @@ public class TopicFilterPersistenceReaderWriter {
         return convertToTopicFilters(persistenceEntity);
     }
 
-    public synchronized void writePersistence(final @NotNull Collection<TopicFilter> topicFilters) {
+    public synchronized void writePersistence(final @NotNull Collection<TopicFilter> tags) {
         if (persistenceFile.exists() && !persistenceFile.canWrite()) {
             log.error("Unable to write to persistence file {}, because it is not writable.", persistenceFile);
             throw new UnrecoverableException(false);
@@ -71,7 +71,7 @@ public class TopicFilterPersistenceReaderWriter {
         log.debug("Writing persistence file {}", persistenceFile);
 
         try {
-            final TopicFilterPersistenceEntity persistenceEntity = convertToEntity(topicFilters);
+            final TopicFilterPersistenceEntity persistenceEntity = convertToEntity(tags);
             final String xml = xmlMapper.writeValueAsString(persistenceEntity);
             Files.writeString(persistenceFile.toPath(), xml);
         } catch (final JsonProcessingException e) {
