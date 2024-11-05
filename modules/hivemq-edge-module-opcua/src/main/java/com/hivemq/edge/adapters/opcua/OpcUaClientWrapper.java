@@ -122,7 +122,7 @@ public class OpcUaClientWrapper {
         });
     }
 
-    public void write(final @NotNull WritingInput writingInput, final @NotNull WritingOutput writingOutput, Tag<OpcuaTagDefinition> opcuaTag) {
+    public void write(final @NotNull WritingInput writingInput, final @NotNull WritingOutput writingOutput, @NotNull OpcuaTag opcuaTag) {
         final OpcUaPayload opcUAWritePayload = (OpcUaPayload) writingInput.getWritingPayload();
         final MqttToOpcUaMapping writeContext = (MqttToOpcUaMapping) writingInput.getWritingContext();
         log.debug("Write for opcua is invoked with payload '{}' and context '{}' ", opcUAWritePayload, writeContext);

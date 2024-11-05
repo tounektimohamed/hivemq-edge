@@ -43,6 +43,7 @@ import com.hivemq.edge.adapters.http.config.mqtt2http.MqttToHttpMapping;
 import com.hivemq.edge.adapters.http.model.HttpData;
 import com.hivemq.edge.adapters.http.mqtt2http.HttpPayload;
 import com.hivemq.edge.adapters.http.mqtt2http.JsonSchema;
+import com.hivemq.edge.adapters.http.tag.HttpTag;
 import com.hivemq.edge.adapters.http.tag.HttpTagDefinition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -172,7 +173,7 @@ public class HttpProtocolAdapter
 
     private void pollHttp(
             @NotNull PollingOutput pollingOutput,
-            Tag<HttpTagDefinition> httpTag,
+            HttpTag httpTag,
             HttpToMqttMapping httpToMqttMapping) {
         final HttpRequest.Builder builder = HttpRequest.newBuilder();
         final String url = httpTag.getDefinition().getUrl();
@@ -300,7 +301,7 @@ public class HttpProtocolAdapter
         final MqttToHttpMapping mqttToHttpMapping = (MqttToHttpMapping) writingInput.getWritingContext();
 
         final String tagName = mqttToHttpMapping.getTagName();
-        final Tag<HttpTagDefinition> httpTag;
+        final HttpTag httpTag;
         adapterConfig.getTags().stream()
                 .filter(tag -> tag.getName().equals(mqttToHttpMapping.getTagName()))
                 .findFirst()
@@ -315,8 +316,8 @@ public class HttpProtocolAdapter
     private void writeHttp(
             @NotNull WritingInput writingInput,
             @NotNull WritingOutput writingOutput,
-            Tag<HttpTagDefinition> httpTag,
-            MqttToHttpMapping mqttToHttpMapping) {
+            @NotNull HttpTag httpTag,
+            @NotNull MqttToHttpMapping mqttToHttpMapping) {
         final String url = httpTag.getDefinition().getUrl();
 
         final HttpRequest.Builder builder = HttpRequest.newBuilder();

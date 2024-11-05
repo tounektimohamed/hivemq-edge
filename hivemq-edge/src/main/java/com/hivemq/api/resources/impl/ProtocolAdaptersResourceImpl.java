@@ -264,7 +264,7 @@ public class ProtocolAdaptersResourceImpl extends AbstractApi implements Protoco
             return ApiErrorUtils.badRequest(errorMessages);
         }
         try {
-            protocolAdapterManager.addAdapter(adapterType, adapter.getId(), adapter.getConfig());
+            protocolAdapterManager.addAdapter(adapterType, adapter.getId(), adapter.getConfig(), List.of()); //FIXME not correct
         } catch (final IllegalArgumentException e) {
             if (e.getCause() instanceof UnrecognizedPropertyException) {
                 ApiErrorUtils.addValidationError(errorMessages,
@@ -294,7 +294,7 @@ public class ProtocolAdaptersResourceImpl extends AbstractApi implements Protoco
         if (logger.isDebugEnabled()) {
             logger.debug("Updating adapter \"{}\".", adapterId);
         }
-        protocolAdapterManager.updateAdapter(adapterId, adapter.getConfig());
+        protocolAdapterManager.updateAdapter(adapterId, adapter.getConfig(), List.of()); //FIXME not correct
         return Response.ok().build();
     }
 
