@@ -45,6 +45,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -222,6 +223,7 @@ public class OpcUaClientWrapper {
 
     public static CompletableFuture<OpcUaClientWrapper> createAndConnect(
             final @NotNull OpcUaAdapterConfig adapterConfig,
+            final @NotNull List<Tag> tags,
             final @NotNull ProtocolAdapterState protocolAdapterState,
             final @NotNull EventService eventService,
             final @NotNull ProtocolAdapterPublishService adapterPublishService,
@@ -267,7 +269,7 @@ public class OpcUaClientWrapper {
                     protocolAdapterMetricsService,
                     eventService,
                     adapterPublishService,
-                    adapterConfig.getTags());
+                    tags);
 
             opcUaClient.getSubscriptionManager().addSubscriptionListener(opcUaSubscriptionLifecycle);
 
