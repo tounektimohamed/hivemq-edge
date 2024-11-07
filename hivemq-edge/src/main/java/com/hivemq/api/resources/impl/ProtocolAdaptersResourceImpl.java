@@ -52,7 +52,6 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.domain.DomainTag;
 import com.hivemq.persistence.domain.DomainTagAddResult;
 import com.hivemq.persistence.domain.DomainTagDeleteResult;
-import com.hivemq.persistence.domain.DomainTagPersistence;
 import com.hivemq.persistence.domain.DomainTagUpdateResult;
 import com.hivemq.protocols.ProtocolAdapterManager;
 import com.hivemq.protocols.ProtocolAdapterSchemaManager;
@@ -89,7 +88,6 @@ public class ProtocolAdaptersResourceImpl extends AbstractApi implements Protoco
     private final @NotNull ProtocolAdapterWritingService protocolAdapterWritingService;
     private final @NotNull ObjectMapper objectMapper;
     private final @NotNull VersionProvider versionProvider;
-    private final @NotNull DomainTagPersistence domainTagPersistence;
 
     @Inject
     public ProtocolAdaptersResourceImpl(
@@ -98,14 +96,12 @@ public class ProtocolAdaptersResourceImpl extends AbstractApi implements Protoco
             final @NotNull ProtocolAdapterManager protocolAdapterManager,
             final @NotNull ProtocolAdapterWritingService protocolAdapterWritingService,
             final @NotNull ObjectMapper objectMapper,
-            final @NotNull VersionProvider versionProvider,
-            final @NotNull DomainTagPersistence domainTagPersistence) {
+            final @NotNull VersionProvider versionProvider) {
         this.remoteService = remoteService;
         this.configurationService = configurationService;
         this.protocolAdapterManager = protocolAdapterManager;
         this.objectMapper = ProtocolAdapterUtils.createProtocolAdapterMapper(objectMapper);
         this.versionProvider = versionProvider;
-        this.domainTagPersistence = domainTagPersistence;
         this.protocolAdapterWritingService = protocolAdapterWritingService;
     }
 
@@ -264,7 +260,7 @@ public class ProtocolAdaptersResourceImpl extends AbstractApi implements Protoco
             return ApiErrorUtils.badRequest(errorMessages);
         }
         try {
-            protocolAdapterManager.addAdapter(adapterType, adapter.getId(), adapter.getConfig(), List.of()); //FIXME not correct
+            protocolAdapterManager.addAdapterWithoutTags(adapterType, adapter.getId(), adapter.getConfig());
         } catch (final IllegalArgumentException e) {
             if (e.getCause() instanceof UnrecognizedPropertyException) {
                 ApiErrorUtils.addValidationError(errorMessages,
@@ -294,7 +290,7 @@ public class ProtocolAdaptersResourceImpl extends AbstractApi implements Protoco
         if (logger.isDebugEnabled()) {
             logger.debug("Updating adapter \"{}\".", adapterId);
         }
-        protocolAdapterManager.updateAdapter(adapterId, adapter.getConfig(), List.of()); //FIXME not correct
+        protocolAdapterManager.updateAdapterConfig(adapterId, adapter.getConfig());
         return Response.ok().build();
     }
 
@@ -309,6 +305,7 @@ public class ProtocolAdaptersResourceImpl extends AbstractApi implements Protoco
             logger.debug("Deleting adapter \"{}\".", adapterId);
         }
         protocolAdapterManager.deleteAdapter(adapterId);
+
         return Response.ok().build();
     }
 
@@ -405,22 +402,26 @@ public class ProtocolAdaptersResourceImpl extends AbstractApi implements Protoco
 
     @Override
     public @NotNull Response getDomainTagsForAdapter(@NotNull final String adapterId) {
-        final List<DomainTag> tagsForAdapter = domainTagPersistence.getTagsForAdapter(adapterId);
-        if (tagsForAdapter.isEmpty()) {
-            // empty list is also 200 as discussed.
-            return Response.ok().build();
-        }
-        final List<DomainTagModel> domainTagModels =
-                tagsForAdapter.stream().map(DomainTagModel::fromDomainTag).collect(Collectors.toList());
-        final DomainTagModelList domainTagModelList = new DomainTagModelList(domainTagModels);
-        return Response.ok().entity(domainTagModelList).build();
+        return protocolAdapterManager
+                .getTagsForAdapter(adapterId)
+                .map(tags -> {
+                    if(tags.isEmpty()) {
+                        return Response.ok().build();
+                    } else {
+                        final List<DomainTagModel> domainTagModels =
+                                tags.stream().map(DomainTagModel::fromDomainTag).collect(Collectors.toList());
+                        final DomainTagModelList domainTagModelList = new DomainTagModelList(domainTagModels);
+                        return Response.ok().entity(domainTagModelList).build();
+                    }
+                })
+                .orElse(Response.status(Response.Status.NOT_FOUND).build());
     }
 
     @Override
     public @NotNull Response addAdapterDomainTag(
             @NotNull final String adapterId, @NotNull final DomainTagModel domainTag) {
         final DomainTagAddResult domainTagAddResult =
-                domainTagPersistence.addDomainTag(DomainTag.fromDomainTagEntity(domainTag, adapterId));
+                protocolAdapterManager.addDomainTag(adapterId, DomainTag.fromDomainTagEntity(domainTag, adapterId));
         switch (domainTagAddResult.getDomainTagPutStatus()) {
             case SUCCESS:
                 return Response.ok().build();
@@ -440,7 +441,7 @@ public class ProtocolAdaptersResourceImpl extends AbstractApi implements Protoco
         final byte[] decoded = Base64.getDecoder().decode(tagIdBase64Encoded);
         final String tagId = new String(decoded, StandardCharsets.UTF_8);
 
-        final DomainTagDeleteResult domainTagDeleteResult = domainTagPersistence.deleteDomainTag(adapterId, tagId);
+        final DomainTagDeleteResult domainTagDeleteResult = protocolAdapterManager.deleteDomainTag(adapterId, tagId);
         switch (domainTagDeleteResult.getDomainTagDeleteStatus()) {
             case SUCCESS:
                 return Response.ok().build();
@@ -453,8 +454,8 @@ public class ProtocolAdaptersResourceImpl extends AbstractApi implements Protoco
     @Override
     public @NotNull Response updateDomainTag(
             final @NotNull String adapterId, @NotNull final String tagId, final @NotNull DomainTagModel domainTag) {
-        final DomainTagUpdateResult domainTagUpdateResult = domainTagPersistence.updateDomainTag(tagId,
-                DomainTag.fromDomainTagEntity(domainTag, adapterId));
+        final DomainTagUpdateResult domainTagUpdateResult =
+                protocolAdapterManager.updateDomainTag(DomainTag.fromDomainTagEntity(domainTag, adapterId));
         switch (domainTagUpdateResult.getDomainTagUpdateStatus()) {
             case SUCCESS:
                 return Response.ok().build();
@@ -474,7 +475,7 @@ public class ProtocolAdaptersResourceImpl extends AbstractApi implements Protoco
                 .map(e -> DomainTag.fromDomainTagEntity(e, adapterId))
                 .collect(Collectors.toSet());
         final DomainTagUpdateResult domainTagUpdateResult =
-                domainTagPersistence.updateDomainTags(adapterId, domainTags);
+                protocolAdapterManager.updateDomainTags(adapterId, domainTags);
         switch (domainTagUpdateResult.getDomainTagUpdateStatus()) {
             case SUCCESS:
                 return Response.ok().build();
@@ -494,7 +495,7 @@ public class ProtocolAdaptersResourceImpl extends AbstractApi implements Protoco
 
     @Override
     public @NotNull Response getDomainTags() {
-        final List<DomainTag> domainTags = domainTagPersistence.getDomainTags();
+        final List<DomainTag> domainTags = protocolAdapterManager.getDomainTags();
         if (domainTags.isEmpty()) {
             // empty list is also 200 as discussed.
             return Response.ok().build();
