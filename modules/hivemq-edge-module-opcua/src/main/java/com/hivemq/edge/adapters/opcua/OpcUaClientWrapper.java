@@ -71,17 +71,24 @@ public class OpcUaClientWrapper {
     }
 
     public CompletableFuture<Void> stop() {
-        return opcUaSubscriptionLifecycle.stop()
-                .thenCompose(ignored -> client.disconnect().thenApply(ignored2 -> null));
+        return opcUaSubscriptionLifecycle
+                .stop()
+                .thenCompose(ignored ->
+                    client
+                        .disconnect()
+                        .thenApply(ignored2 -> null)
+                );
     }
 
     public @NotNull CompletableFuture<@NotNull JsonNode> createMqttPayloadJsonSchema(final @NotNull MqttToOpcUaMapping writeContext) {
-        return jsonSchemaGenerator.map(gen -> gen.createJsonSchema(NodeId.parse(writeContext.getNode())))
+        return jsonSchemaGenerator
+                .map(gen -> gen.createJsonSchema(NodeId.parse(writeContext.getNode())))
                 .orElseGet(() -> CompletableFuture.failedFuture(new NullPointerException()));
     }
 
     public void discoverValues(
-            final @NotNull ProtocolAdapterDiscoveryInput input, final @NotNull ProtocolAdapterDiscoveryOutput output) {
+            final @NotNull ProtocolAdapterDiscoveryInput input,
+            final @NotNull ProtocolAdapterDiscoveryOutput output) {
         Objects.requireNonNull(client, "OPC UA Adapter not started yet");
 
         final NodeId browseRoot;
@@ -122,27 +129,25 @@ public class OpcUaClientWrapper {
         log.debug("Write for opcua is invoked with payload '{}' and context '{}' ", opcUAWritePayload, writeContext);
         final NodeId nodeId = NodeId.parse(writeContext.getNode());
 
-        try {
-            jsonToOpcUAConverter.map(conv -> conv.convertToOpcUAValue(opcUAWritePayload.getValue(), nodeId))
-                    .ifPresentOrElse(opcUaObject -> {
-                        final Variant variant = new Variant(opcUaObject);
-                        final DataValue dataValue = new DataValue(variant, null, null);
-                        final CompletableFuture<StatusCode> writeFuture = client.writeValue(nodeId, dataValue);
-                        writeFuture.whenComplete((statusCode, throwable) -> {
-                            if (throwable != null) {
-                                log.error("Exception while writing to opcua node '{}'",
-                                        writeContext.getNode(),
-                                        throwable);
-                                writingOutput.fail(throwable, null);
-                            } else {
-                                log.info("Wrote '{}' to nodeId={}", variant, nodeId);
-                                writingOutput.finish();
-                            }
-                        });
-                    }, () -> writingOutput.fail("JsonToOpcUaConverter not available"));
-        } catch (final Exception e) {
-            writingOutput.fail(e, null);
-        }
+        jsonToOpcUAConverter
+                .map(conv -> conv.convertToOpcUAValue(opcUAWritePayload.getValue(), nodeId))
+                .ifPresentOrElse(
+                        opcUaObject -> {
+                                final Variant variant = new Variant(opcUaObject);
+                                final DataValue dataValue = new DataValue(variant, null, null);
+                                final CompletableFuture<StatusCode> writeFuture = client.writeValue(nodeId, dataValue);
+                                writeFuture.whenComplete((statusCode, throwable) -> {
+                                    if (throwable != null) {
+                                        log.error("Exception while writing to opcua node '{}'", writeContext.getNode(), throwable);
+                                        writingOutput.fail(throwable, null);
+                                    } else {
+                                        log.info("Wrote '{}' to nodeId={}", variant, nodeId);
+                                        writingOutput.finish();
+                                    }
+                                });
+                            },
+                        () -> writingOutput.fail("JsonToOpcUaConverter not available"));
+
     }
 
     private static @NotNull CompletableFuture<Void> browse(
@@ -158,7 +163,8 @@ public class OpcUaClientWrapper {
                 uint(0),
                 uint(BrowseResultMask.All.getValue()));
 
-        return client.browse(browse)
+        return client
+                .browse(browse)
                 .thenCompose(browseResult -> handleBrowseResult(client, parent, callback, depth, browseResult));
     }
 
@@ -187,13 +193,11 @@ public class OpcUaClientWrapper {
 
         final ByteString continuationPoint = browseResult.getContinuationPoint();
         if (continuationPoint != null && !continuationPoint.isNull()) {
-            childFutures.add(Objects.requireNonNull(client)
-                    .browseNext(false, continuationPoint)
-                    .thenCompose(nextBrowseResult -> handleBrowseResult(client,
-                            parent,
-                            callback,
-                            depth,
-                            nextBrowseResult)));
+            childFutures.add(
+                    Objects.requireNonNull(client)
+                            .browseNext(false, continuationPoint)
+                            .thenCompose(nextBrowseResult ->
+                                    handleBrowseResult(client, parent, callback, depth, nextBrowseResult)));
         }
 
         return CompletableFuture.allOf(childFutures.build().toArray(new CompletableFuture[]{}));
@@ -222,7 +226,8 @@ public class OpcUaClientWrapper {
             final @NotNull ModuleServices moduleServices,
             final @NotNull String id,
             final @NotNull String protocolId,
-            final @NotNull ProtocolAdapterMetricsService protocolAdapterMetricsService) throws UaException {
+            final @NotNull ProtocolAdapterMetricsService protocolAdapterMetricsService
+    ) throws UaException {
         final String configPolicyUri = adapterConfig.getSecurity().getPolicy().getSecurityPolicy().getUri();
 
         OpcUaClient opcUaClient = OpcUaClient.create(adapterConfig.getUri(),
@@ -256,36 +261,30 @@ public class OpcUaClientWrapper {
         });
 
         return opcUaClient.connect().thenCompose(uaClient -> {
-            OpcUaSubscriptionLifecycle opcUaSubscriptionLifecycle = new OpcUaSubscriptionLifecycle(opcUaClient,
+            OpcUaSubscriptionLifecycle opcUaSubscriptionLifecycle = new OpcUaSubscriptionLifecycle(
+                    opcUaClient,
                     adapterConfig.getId(),
                     protocolId,
                     protocolAdapterMetricsService,
                     moduleServices.eventService(),
                     moduleServices.adapterPublishService());
 
-            opcUaClient.getSubscriptionManager().addSubscriptionListener(opcUaSubscriptionLifecycle);
+            opcUaClient.getSubscriptionManager()
+                    .addSubscriptionListener(opcUaSubscriptionLifecycle);
 
             try {
-                Optional<JsonToOpcUAConverter> jsonToOpcUAConverterOpt =
-                        Optional.of(new JsonToOpcUAConverter(opcUaClient));
-                Optional<JsonSchemaGenerator> jsonSchemaGeneratorOpt =
-                        Optional.of(new JsonSchemaGenerator(opcUaClient, new ObjectMapper()));
-                return opcUaSubscriptionLifecycle.subscribeAll(adapterConfig.getOpcuaToMqttConfig()
-                                .getOpcuaToMqttMappings())
-                        .thenApply(ignored -> new OpcUaClientWrapper(opcUaClient,
-                                opcUaSubscriptionLifecycle,
-                                jsonToOpcUAConverterOpt,
-                                jsonSchemaGeneratorOpt));
+                Optional<JsonToOpcUAConverter> jsonToOpcUAConverterOpt = Optional.of(new JsonToOpcUAConverter(opcUaClient));
+                Optional<JsonSchemaGenerator> jsonSchemaGeneratorOpt = Optional.of(new JsonSchemaGenerator(opcUaClient    , new ObjectMapper()));
+                return opcUaSubscriptionLifecycle
+                        .subscribeAll(adapterConfig.getOpcuaToMqttConfig().getOpcuaToMqttMappings())
+                        .thenApply(ignored -> new OpcUaClientWrapper(opcUaClient, opcUaSubscriptionLifecycle, jsonToOpcUAConverterOpt, jsonSchemaGeneratorOpt));
             } catch (final UaException e) {
                 log.error("Unable to create the converters for writing.", e);
                 Optional<JsonToOpcUAConverter> jsonToOpcUAConverterOpt = Optional.empty();
                 Optional<JsonSchemaGenerator> jsonSchemaGeneratorOpt = Optional.empty();
-                return opcUaSubscriptionLifecycle.subscribeAll(adapterConfig.getOpcuaToMqttConfig()
-                                .getOpcuaToMqttMappings())
-                        .thenApply(ignored -> new OpcUaClientWrapper(opcUaClient,
-                                opcUaSubscriptionLifecycle,
-                                jsonToOpcUAConverterOpt,
-                                jsonSchemaGeneratorOpt));
+                return opcUaSubscriptionLifecycle
+                        .subscribeAll(adapterConfig.getOpcuaToMqttConfig().getOpcuaToMqttMappings())
+                        .thenApply(ignored -> new OpcUaClientWrapper(opcUaClient, opcUaSubscriptionLifecycle, jsonToOpcUAConverterOpt, jsonSchemaGeneratorOpt));
             }
         });
     }
