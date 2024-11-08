@@ -21,7 +21,6 @@ import com.google.common.collect.ImmutableList;
 import com.hivemq.adapter.sdk.api.ProtocolAdapterCapability;
 import com.hivemq.adapter.sdk.api.ProtocolAdapterInformation;
 import com.hivemq.adapter.sdk.api.discovery.ProtocolAdapterDiscoveryInput;
-import com.hivemq.adapter.sdk.api.factories.ProtocolAdapterFactory;
 import com.hivemq.adapter.sdk.api.services.ProtocolAdapterWritingService;
 import com.hivemq.api.AbstractApi;
 import com.hivemq.api.model.ApiConstants;
@@ -377,8 +376,6 @@ public class ProtocolAdaptersResourceImpl extends AbstractApi implements Protoco
             return;
         }
 
-        final ProtocolAdapterFactory<?> protocolAdapterFactory =
-                protocolAdapterManager.getProtocolAdapterFactory(information.getProtocolId());
         final ProtocolAdapterSchemaManager protocolAdapterSchemaManager =
                 new ProtocolAdapterSchemaManager(objectMapper, protocolAdapterWritingService.writingEnabled() ? information.configurationClassWriting() : information.configurationClassReading());
         final ProtocolAdapterValidator validator =
