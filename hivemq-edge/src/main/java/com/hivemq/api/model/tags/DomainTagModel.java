@@ -23,19 +23,22 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.domain.DomainTag;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import javax.validation.constraints.Null;
+import java.util.Objects;
+
 @Schema(name = "DomainTag")
 public class DomainTagModel {
 
     @JsonProperty("tagDefinition")
-    @Schema(description = "The address for the data point on the device.")
+    @Schema(description = "The address for the data point on the device.", requiredMode = Schema.RequiredMode.REQUIRED)
     private final @NotNull JsonNode tagDefinition;
 
     @JsonProperty("tagName")
-    @Schema(description = "The name of the tag that identifies it within this edge instance.")
+    @Schema(description = "The name of the tag that identifies it within this edge instance.", requiredMode = Schema.RequiredMode.REQUIRED)
     private final @NotNull String tag;
 
     @JsonProperty("protocolId")
-    @Schema(description = "The protocol id of the protocol for which this tag was created.")
+    @Schema(description = "The protocol id of the protocol for which this tag was created.", requiredMode = Schema.RequiredMode.REQUIRED)
     private final @NotNull String protocolId;
 
     @JsonProperty("description")
@@ -47,11 +50,11 @@ public class DomainTagModel {
             @JsonProperty("tagDefinition") final @NotNull JsonNode tagDefinition,
             @JsonProperty("tagName") final @NotNull String tag,
             @JsonProperty("protocolId") final @NotNull String protocolId,
-            @JsonProperty("description") final @NotNull String description) {
+            @JsonProperty("description") final @Nullable String description) {
         this.tagDefinition = tagDefinition;
         this.tag = tag;
         this.protocolId = protocolId;
-        this.description = description;
+        this.description = Objects.requireNonNullElse(description, "");
     }
 
     public @NotNull String getTag() {
