@@ -1,12 +1,11 @@
 FROM openjdk:11-jre-slim
 
 # Install dependencies
-RUN apt-get update && apt-get install -y curl
+RUN apt-get update && apt-get install -y curl unzip
 
-# Download and install HiveMQ Edge
-RUN curl -L https://www.hivemq.com/downloads/hivemq-edge-4.4.0.tar.gz -o hivemq-edge.tar.gz
-RUN tar -xzvf hivemq-edge.tar.gz
-RUN rm hivemq-edge.tar.gz
+# Download and install HiveMQ Edge (example for zip)
+RUN curl -L https://www.hivemq.com/downloads/hivemq-edge-4.4.0.zip -o hivemq-edge.zip
+RUN unzip hivemq-edge.zip && rm hivemq-edge.zip
 
 # Set working directory
 WORKDIR /hivemq-edge
